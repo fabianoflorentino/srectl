@@ -4,6 +4,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/fabianoflorentino/srectl/internal/kind"
+	"github.com/fabianoflorentino/srectl/internal/platform"
 )
 
 func newClusterCommand() *cobra.Command {
@@ -27,7 +28,11 @@ func newClusterCreateCommand() *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cfg := configFrom(cmd)
 			client := kind.New(kind.WithStdout(cmd.OutOrStdout()), kind.WithStderr(cmd.ErrOrStderr()))
-			return client.Create(cmd.Context(), kind.Cluster{Name: cfg.Cluster.Name, Nodes: cfg.Cluster.Nodes})
+			return client.Create(cmd.Context(), kind.Cluster{
+				Name:       cfg.Cluster.Name,
+				Nodes:      cfg.Cluster.Nodes,
+				ConfigFile: platform.KindConfigFile(),
+			})
 		},
 	}
 }

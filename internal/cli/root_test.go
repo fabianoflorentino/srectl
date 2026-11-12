@@ -41,35 +41,55 @@ func TestHelpListsCommands(t *testing.T) {
 	}
 }
 
-// fakeKindOnPath installs a fake `kind` binary at the front of PATH. It echoes
-// args for create/delete and reads cluster/node names from environment
-// variables for `get` subcommands.
-func fakeKindOnPath(t *testing.T, clusters, nodes string) {
+func writeExec(t *testing.T, path, content string) {
+	t.Helper()
+	if err := os.WriteFile(path, []byte(content), 0o755); err != nil {
+		t.Fatalf("writing fake binary %s: %v", path, err)
+	}
+}
+
+// fakeBinaries installs fake kind, kubectl and helm binaries at the front of
+// PATH. kind reads cluster/node names from env for `get` subcommands; kubectl
+// reports deployments as available; everything else echoes its arguments.
+func fakeBinaries(t *testing.T, clusters, nodes string) {
 	t.Helper()
 	dir := t.TempDir()
 
-	script := `#!/bin/sh
+	writeExec(t, filepath.Join(dir, "kind"), `#!/bin/sh
 case "$1" in
   get)
     if [ "$2" = "clusters" ]; then printf '%s' "$FAKE_CLUSTERS"; fi
     if [ "$2" = "nodes" ]; then printf '%s' "$FAKE_NODES"; fi
     ;;
+  *) echo "$@";;
+esac
+exit 0`)
+
+	writeExec(t, filepath.Join(dir, "kubectl"), `#!/bin/sh
+case "$1" in
+  get)
+    if [ "$2" = "secret" ]; then echo "Zm9v"; else echo "1"; fi
+    ;;
+  create)
+    echo "apiVersion: v1"
+    ;;
   *)
     echo "$@"
     ;;
 esac
-exit 0
-`
-	if err := os.WriteFile(filepath.Join(dir, "kind"), []byte(script), 0o755); err != nil {
-		t.Fatalf("writing fake kind: %v", err)
-	}
+exit 0`)
+
+	writeExec(t, filepath.Join(dir, "helm"), `#!/bin/sh
+echo "$@"
+exit 0`)
+
 	t.Setenv("FAKE_CLUSTERS", clusters)
 	t.Setenv("FAKE_NODES", nodes)
 	t.Setenv("PATH", dir+":"+os.Getenv("PATH"))
 }
 
 func TestClusterStatusDown(t *testing.T) {
-	fakeKindOnPath(t, "", "")
+	fakeBinaries(t, "", "")
 
 	var out bytes.Buffer
 	root := NewRootCommand()
@@ -85,7 +105,7 @@ func TestClusterStatusDown(t *testing.T) {
 }
 
 func TestClusterStatusUp(t *testing.T) {
-	fakeKindOnPath(t, "srectl", "cp w1 w2")
+	fakeBinaries(t, "srectl", "cp w1 w2")
 
 	var out bytes.Buffer
 	root := NewRootCommand()
@@ -101,7 +121,7 @@ func TestClusterStatusUp(t *testing.T) {
 }
 
 func TestClusterCreate(t *testing.T) {
-	fakeKindOnPath(t, "", "")
+	fakeBinaries(t, "", "")
 
 	var out bytes.Buffer
 	root := NewRootCommand()
@@ -117,7 +137,7 @@ func TestClusterCreate(t *testing.T) {
 }
 
 func TestClusterDelete(t *testing.T) {
-	fakeKindOnPath(t, "", "")
+	fakeBinaries(t, "", "")
 
 	var out bytes.Buffer
 	root := NewRootCommand()
@@ -133,7 +153,7 @@ func TestClusterDelete(t *testing.T) {
 }
 
 func TestUpCommand(t *testing.T) {
-	fakeKindOnPath(t, "", "")
+	fakeBinaries(t, "", "")
 
 	var out bytes.Buffer
 	root := NewRootCommand()
@@ -143,13 +163,13 @@ func TestUpCommand(t *testing.T) {
 	if err := root.Execute(); err != nil {
 		t.Fatalf("execute up: %v", err)
 	}
-	if !strings.Contains(out.String(), "cluster ready") {
-		t.Errorf("up output = %q, want cluster ready", out.String())
+	if !strings.Contains(out.String(), "platform ready") {
+		t.Errorf("up output = %q, want platform ready", out.String())
 	}
 }
 
 func TestDownCommand(t *testing.T) {
-	fakeKindOnPath(t, "", "")
+	fakeBinaries(t, "", "")
 
 	var out bytes.Buffer
 	root := NewRootCommand()
@@ -164,13 +184,30 @@ func TestDownCommand(t *testing.T) {
 	}
 }
 
+func TestStatusCommand(t *testing.T) {
+	fakeBinaries(t, "srectl", "cp w1 w2")
+
+	var out bytes.Buffer
+	root := NewRootCommand()
+	root.SetOut(&out)
+	root.SetArgs([]string{"status"})
+
+	if err := root.Execute(); err != nil {
+		t.Fatalf("execute status: %v", err)
+	}
+	for _, want := range []string{"cluster:", "up (3 nodes)", "ingress:", "Ready", "cert-manager:", "hello:"} {
+		if !strings.Contains(out.String(), want) {
+			t.Errorf("status output missing %q, got %q", want, out.String())
+		}
+	}
+}
+
 func TestStubCommands(t *testing.T) {
 	cases := []struct {
 		name    string
 		args    []string
 		wantErr string
 	}{
-		{"status", []string{"status"}, "not implemented yet (Phase 3)"},
 		{"bootstrap", []string{"bootstrap"}, "not implemented yet (Phase 2)"},
 		{"sync", []string{"sync"}, "not implemented yet (Phase 2)"},
 		{"apps deploy", []string{"apps", "deploy"}, "not implemented yet (Phase 5)"},

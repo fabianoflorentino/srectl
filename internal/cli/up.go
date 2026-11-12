@@ -3,7 +3,9 @@ package cli
 import (
 	"github.com/spf13/cobra"
 
+	"github.com/fabianoflorentino/srectl/internal/k8s"
 	"github.com/fabianoflorentino/srectl/internal/kind"
+	"github.com/fabianoflorentino/srectl/internal/platform"
 )
 
 func newUpCommand() *cobra.Command {
@@ -13,12 +15,14 @@ func newUpCommand() *cobra.Command {
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cfg := configFrom(cmd)
-			client := kind.New(kind.WithStdout(cmd.OutOrStdout()), kind.WithStderr(cmd.ErrOrStderr()))
-
-			if err := client.Create(cmd.Context(), kind.Cluster{Name: cfg.Cluster.Name, Nodes: cfg.Cluster.Nodes}); err != nil {
+			mgr := platform.New(
+				kind.New(kind.WithStdout(cmd.OutOrStdout()), kind.WithStderr(cmd.ErrOrStderr())),
+				k8s.New(k8s.WithStdout(cmd.OutOrStdout()), k8s.WithStderr(cmd.ErrOrStderr())),
+			)
+			if err := mgr.Up(cmd.Context(), mgr.ClusterSpec(cfg.Cluster.Name, cfg.Cluster.Nodes)); err != nil {
 				return err
 			}
-			return writef(cmd.OutOrStdout(), "cluster ready — bootstrap (Argo CD) lands in Phase 2\n")
+			return writef(cmd.OutOrStdout(), "platform ready — hello at https://hello.localhost\n")
 		},
 	}
 }
