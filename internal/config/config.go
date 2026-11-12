@@ -70,8 +70,7 @@ func setDefaults(v *viper.Viper) {
 // defaults and environment variables alone.
 func Load(v *viper.Viper) (*Config, error) {
 	if err := v.ReadInConfig(); err != nil {
-		var notFound viper.ConfigFileNotFoundError
-		if !errors.As(err, &notFound) {
+		if _, ok := errors.AsType[viper.ConfigFileNotFoundError](err); !ok {
 			return nil, fmt.Errorf("reading config: %w", err)
 		}
 	}
