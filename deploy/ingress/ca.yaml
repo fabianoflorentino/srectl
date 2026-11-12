@@ -1,0 +1,26 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: srectl-root-ca
+  namespace: demo
+spec:
+  isCA: true
+  commonName: srectl local CA
+  secretName: srectl-root-ca
+  duration: 8760h # 1 year
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+  issuerRef:
+    name: selfsigned
+    kind: ClusterIssuer
+    group: cert-manager.io
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: srectl-ca
+  namespace: demo
+spec:
+  ca:
+    secretName: srectl-root-ca
