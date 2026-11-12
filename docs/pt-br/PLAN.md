@@ -114,11 +114,11 @@ srectl version       info de build
 
 Tarefas:
 
-- [ ] `deploy/kind/kind-config.yaml` — 3 nós, ingress-nginx `extraPortMappings` (80/443).
-- [ ] ingress-nginx implantado (via bootstrap do Argo CD ou imperativo).
-- [ ] cert-manager + `ClusterIssuer` selfsigned + `ConfigMap` de bundle de confiança.
-- [ ] Uma app `hello` provando o round trip: ingress → TLS → pod.
-- [ ] `srectl up` dirige toda esta fase de forma idempotente.
+- [x] `deploy/kind/kind-config.yaml` — 3 nós, ingress-nginx `extraPortMappings` (80/443).
+- [x] ingress-nginx implantado (bootstrap imperativo; Argo CD a partir da Fase 2).
+- [x] cert-manager + `ClusterIssuer` selfsigned + `ConfigMap` de bundle de confiança.
+- [x] Uma app `hello` provando o round trip: ingress → TLS → pod.
+- [x] `srectl up` dirige toda esta fase de forma idempotente.
 
 **Critérios de aceite:**
 

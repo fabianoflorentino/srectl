@@ -3,8 +3,9 @@
 A local, reproducible **SRE / DevOps / Platform Engineering** training environment on
 [kind](https://kind.sigs.k8s.io/), driven by a single Go CLI.
 
-> **Status: in progress.** Phase 0 (repository & CLI skeleton) is implemented — the
-> roadmap lives in [`docs/en/PLAN.md`](docs/en/PLAN.md).
+> **Status: in progress.** Phases 0 (repository & CLI skeleton) and 1 (cluster,
+> ingress & TLS) are implemented — the roadmap lives in
+> [`docs/en/PLAN.md`](docs/en/PLAN.md).
 
 ## What it is
 
@@ -74,8 +75,9 @@ To be determined (see LICENSE once added).
 Um ambiente de treinamento **SRE / DevOps / Platform Engineering** local e reprodutível
 em [kind](https://kind.sigs.k8s.io/), dirigido por uma única CLI em Go.
 
-> **Status: em andamento.** A Fase 0 (repositório & esqueleto da CLI) está implementada —
-> o roteiro está em [`docs/pt-br/PLAN.md`](docs/pt-br/PLAN.md).
+> **Status: em andamento.** As Fases 0 (repositório & esqueleto da CLI) e 1 (cluster,
+> ingress & TLS) estão implementadas — o roteiro está em
+> [`docs/pt-br/PLAN.md`](docs/pt-br/PLAN.md).
 
 ## O que é
 
