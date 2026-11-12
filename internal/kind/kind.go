@@ -54,8 +54,9 @@ func New(opts ...Option) *Client {
 
 // Cluster describes the kind cluster to create.
 type Cluster struct {
-	Name  string
-	Nodes int
+	Name       string
+	Nodes      int
+	ConfigFile string // optional path to a kind config file; when empty a minimal config is generated
 }
 
 // configFile is the minimal kind node topology written before `kind create`.
@@ -71,14 +72,20 @@ type configNode struct {
 }
 
 // Create provisions a kind cluster with one control-plane and Nodes-1 workers.
+// When ConfigFile is set it is passed to `kind create --config`; otherwise a
+// minimal config is generated from Nodes.
 func (c *Client) Create(ctx context.Context, cluster Cluster) error {
-	path, err := writeConfig(cluster.Nodes)
-	if err != nil {
-		return err
+	configPath := cluster.ConfigFile
+	if configPath == "" {
+		path, err := writeConfig(cluster.Nodes)
+		if err != nil {
+			return err
+		}
+		configPath = path
+		defer func() { _ = os.Remove(configPath) }()
 	}
-	defer func() { _ = os.Remove(path) }()
 
-	return c.run(ctx, "create", "cluster", "--name", cluster.Name, "--config", path)
+	return c.run(ctx, "create", "cluster", "--name", cluster.Name, "--config", configPath)
 }
 
 // Delete removes a kind cluster by name.
