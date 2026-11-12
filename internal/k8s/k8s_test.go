@@ -73,3 +73,71 @@ func TestStderrOption(t *testing.T) {
 		t.Errorf("stderr = %q, want to-stderr", errBuf.String())
 	}
 }
+
+func TestApplyArgs(t *testing.T) {
+	var out bytes.Buffer
+	c := New(WithKubectl(fakeBinary(t, "kubectl", `echo "$@"`)), WithStdout(&out))
+
+	if err := c.Apply(context.Background(), "a.yaml", "b.yaml"); err != nil {
+		t.Fatalf("Apply: %v", err)
+	}
+	if want := "apply -f a.yaml,b.yaml"; !strings.Contains(out.String(), want) {
+		t.Errorf("Apply output = %q, want %q", out.String(), want)
+	}
+}
+
+func TestDeleteArgs(t *testing.T) {
+	var out bytes.Buffer
+	c := New(WithKubectl(fakeBinary(t, "kubectl", `echo "$@"`)), WithStdout(&out))
+
+	if err := c.Delete(context.Background(), "a.yaml"); err != nil {
+		t.Fatalf("Delete: %v", err)
+	}
+	if want := "delete -f a.yaml"; !strings.Contains(out.String(), want) {
+		t.Errorf("Delete output = %q, want %q", out.String(), want)
+	}
+}
+
+func TestRolloutStatusArgs(t *testing.T) {
+	var out bytes.Buffer
+	c := New(WithKubectl(fakeBinary(t, "kubectl", `echo "$@"`)), WithStdout(&out))
+
+	if err := c.RolloutStatus(context.Background(), "demo", "deployment/hello", "300s"); err != nil {
+		t.Fatalf("RolloutStatus: %v", err)
+	}
+	if want := "rollout status deployment/hello --namespace demo --timeout=300s"; !strings.Contains(out.String(), want) {
+		t.Errorf("RolloutStatus output = %q, want %q", out.String(), want)
+	}
+}
+
+func TestDeploymentAvailable(t *testing.T) {
+	c := New(WithKubectl(fakeBinary(t, "kubectl", `echo "1"`)))
+
+	ok, err := c.DeploymentAvailable(context.Background(), "ns", "deploy")
+	if err != nil {
+		t.Fatalf("DeploymentAvailable: %v", err)
+	}
+	if !ok {
+		t.Fatal("DeploymentAvailable = false, want true")
+	}
+}
+
+func TestDeploymentAvailableFalse(t *testing.T) {
+	c := New(WithKubectl(fakeBinary(t, "kubectl", `exit 0`)))
+
+	ok, err := c.DeploymentAvailable(context.Background(), "ns", "deploy")
+	if err != nil {
+		t.Fatalf("DeploymentAvailable: %v", err)
+	}
+	if ok {
+		t.Fatal("DeploymentAvailable = true, want false")
+	}
+}
+
+func TestDeploymentAvailableError(t *testing.T) {
+	c := New(WithKubectl(fakeBinary(t, "kubectl", `exit 1`)))
+
+	if _, err := c.DeploymentAvailable(context.Background(), "ns", "deploy"); err == nil {
+		t.Fatal("DeploymentAvailable = nil error, want an error")
+	}
+}
