@@ -1,0 +1,16 @@
+# srectl defaults. Every key can be overridden by a SRECTL_* environment
+# variable (e.g. SRECTL_CLUSTER_NODES=5) or by the --config flag pointing at a
+# different file. Precedence: flag > env > file > default.
+cluster:
+  name: srectl
+  nodes: 3 # 1 control-plane + 2 workers
+
+components:
+  argocd: true
+  observability: true
+  security: true
+  chaos: true
+  apps: true
+  projects: true
+
+registry: localhost:5000 # image registry for local builds
