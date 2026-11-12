@@ -1,0 +1,56 @@
+BINARY_NAME=srectl
+GO=go
+
+VERSION?=$(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
+COMMIT?=$(shell git rev-parse --short HEAD 2>/dev/null || echo none)
+BUILD_DATE?=$(shell date -u +%Y-%m-%dT%H:%M:%SZ)
+
+LDFLAGS=-ldflags "-X github.com/fabianoflorentino/srectl/internal/version.Version=$(VERSION) \
+	-X github.com/fabianoflorentino/srectl/internal/version.Commit=$(COMMIT) \
+	-X github.com/fabianoflorentino/srectl/internal/version.Date=$(BUILD_DATE)"
+
+.PHONY: all build clean test test-short lint lint-fix fmt docker-build install help
+
+all: clean lint test build
+
+## build: Build the srectl binary
+build:
+	$(GO) build $(LDFLAGS) -o bin/$(BINARY_NAME) ./cmd/srectl
+
+## clean: Remove build artifacts
+clean:
+	rm -rf bin/ coverage.out coverage.html
+
+## test: Run all tests with the race detector
+test:
+	$(GO) test -race -coverprofile=coverage.out ./...
+
+## test-short: Run tests without the race detector
+test-short:
+	$(GO) test -short ./...
+
+## lint: Run golangci-lint
+lint:
+	golangci-lint run ./...
+
+## lint-fix: Run golangci-lint and auto-fix
+lint-fix:
+	golangci-lint run --fix ./...
+
+## fmt: Format the code
+fmt:
+	$(GO) fmt ./...
+	golangci-lint fmt ./...
+
+## docker-build: Build the srectl container image
+docker-build:
+	docker build -t $(BINARY_NAME):$(VERSION) .
+
+## install: Install srectl to GOBIN
+install:
+	$(GO) install $(LDFLAGS) ./cmd/srectl
+
+## help: Show this help message
+help:
+	@echo "Usage: make [target]"
+	@sed -n 's/^##//p' $(MAKEFILE_LIST) | column -t -s ':' | sed -e 's/^/ /'
