@@ -2,6 +2,9 @@ package cli
 
 import (
 	"bytes"
+	"io"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -35,5 +38,183 @@ func TestHelpListsCommands(t *testing.T) {
 		if !strings.Contains(out.String(), want) {
 			t.Errorf("help output missing command %q", want)
 		}
+	}
+}
+
+// fakeKindOnPath installs a fake `kind` binary at the front of PATH. It echoes
+// args for create/delete and reads cluster/node names from environment
+// variables for `get` subcommands.
+func fakeKindOnPath(t *testing.T, clusters, nodes string) {
+	t.Helper()
+	dir := t.TempDir()
+
+	script := `#!/bin/sh
+case "$1" in
+  get)
+    if [ "$2" = "clusters" ]; then printf '%s' "$FAKE_CLUSTERS"; fi
+    if [ "$2" = "nodes" ]; then printf '%s' "$FAKE_NODES"; fi
+    ;;
+  *)
+    echo "$@"
+    ;;
+esac
+exit 0
+`
+	if err := os.WriteFile(filepath.Join(dir, "kind"), []byte(script), 0o755); err != nil {
+		t.Fatalf("writing fake kind: %v", err)
+	}
+	t.Setenv("FAKE_CLUSTERS", clusters)
+	t.Setenv("FAKE_NODES", nodes)
+	t.Setenv("PATH", dir+":"+os.Getenv("PATH"))
+}
+
+func TestClusterStatusDown(t *testing.T) {
+	fakeKindOnPath(t, "", "")
+
+	var out bytes.Buffer
+	root := NewRootCommand()
+	root.SetOut(&out)
+	root.SetArgs([]string{"cluster", "status"})
+
+	if err := root.Execute(); err != nil {
+		t.Fatalf("execute cluster status: %v", err)
+	}
+	if !strings.Contains(out.String(), "down") {
+		t.Errorf("cluster status output = %q, want down", out.String())
+	}
+}
+
+func TestClusterStatusUp(t *testing.T) {
+	fakeKindOnPath(t, "srectl", "cp w1 w2")
+
+	var out bytes.Buffer
+	root := NewRootCommand()
+	root.SetOut(&out)
+	root.SetArgs([]string{"cluster", "status"})
+
+	if err := root.Execute(); err != nil {
+		t.Fatalf("execute cluster status: %v", err)
+	}
+	if !strings.Contains(out.String(), "up (3 nodes)") {
+		t.Errorf("cluster status output = %q, want up (3 nodes)", out.String())
+	}
+}
+
+func TestClusterCreate(t *testing.T) {
+	fakeKindOnPath(t, "", "")
+
+	var out bytes.Buffer
+	root := NewRootCommand()
+	root.SetOut(&out)
+	root.SetArgs([]string{"cluster", "create"})
+
+	if err := root.Execute(); err != nil {
+		t.Fatalf("execute cluster create: %v", err)
+	}
+	if !strings.Contains(out.String(), "--name srectl") {
+		t.Errorf("cluster create output = %q, want --name srectl", out.String())
+	}
+}
+
+func TestClusterDelete(t *testing.T) {
+	fakeKindOnPath(t, "", "")
+
+	var out bytes.Buffer
+	root := NewRootCommand()
+	root.SetOut(&out)
+	root.SetArgs([]string{"cluster", "delete"})
+
+	if err := root.Execute(); err != nil {
+		t.Fatalf("execute cluster delete: %v", err)
+	}
+	if !strings.Contains(out.String(), "delete cluster --name srectl") {
+		t.Errorf("cluster delete output = %q, want delete cluster --name srectl", out.String())
+	}
+}
+
+func TestUpCommand(t *testing.T) {
+	fakeKindOnPath(t, "", "")
+
+	var out bytes.Buffer
+	root := NewRootCommand()
+	root.SetOut(&out)
+	root.SetArgs([]string{"up"})
+
+	if err := root.Execute(); err != nil {
+		t.Fatalf("execute up: %v", err)
+	}
+	if !strings.Contains(out.String(), "cluster ready") {
+		t.Errorf("up output = %q, want cluster ready", out.String())
+	}
+}
+
+func TestDownCommand(t *testing.T) {
+	fakeKindOnPath(t, "", "")
+
+	var out bytes.Buffer
+	root := NewRootCommand()
+	root.SetOut(&out)
+	root.SetArgs([]string{"down"})
+
+	if err := root.Execute(); err != nil {
+		t.Fatalf("execute down: %v", err)
+	}
+	if !strings.Contains(out.String(), "deleted") {
+		t.Errorf("down output = %q, want deleted", out.String())
+	}
+}
+
+func TestStubCommands(t *testing.T) {
+	cases := []struct {
+		name    string
+		args    []string
+		wantErr string
+	}{
+		{"status", []string{"status"}, "not implemented yet (Phase 3)"},
+		{"bootstrap", []string{"bootstrap"}, "not implemented yet (Phase 2)"},
+		{"sync", []string{"sync"}, "not implemented yet (Phase 2)"},
+		{"apps deploy", []string{"apps", "deploy"}, "not implemented yet (Phase 5)"},
+		{"apps restart", []string{"apps", "restart"}, "not implemented yet (Phase 5)"},
+		{"apps scale", []string{"apps", "scale"}, "not implemented yet (Phase 5)"},
+		{"trace", []string{"trace", "api-a"}, "not implemented yet (Phase 6)"},
+		{"certs", []string{"certs"}, "not implemented yet (Phase 6)"},
+		{"open", []string{"open", "grafana"}, "not implemented yet (Phase 1)"},
+		{"logs", []string{"logs", "api-a"}, "not implemented yet (Phase 5)"},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			root := NewRootCommand()
+			root.SetOut(io.Discard)
+			root.SetErr(io.Discard)
+			root.SetArgs(tc.args)
+
+			err := root.Execute()
+			if err == nil {
+				t.Fatalf("execute %v = nil, want error containing %q", tc.args, tc.wantErr)
+			}
+			if !strings.Contains(err.Error(), tc.wantErr) {
+				t.Errorf("execute %v error = %q, want containing %q", tc.args, err, tc.wantErr)
+			}
+		})
+	}
+}
+
+func TestDemoScenarios(t *testing.T) {
+	for _, sc := range []string{"load", "chaos", "break", "verify", "error", "security", "certs", "projects"} {
+		t.Run(sc, func(t *testing.T) {
+			root := NewRootCommand()
+			root.SetOut(io.Discard)
+			root.SetErr(io.Discard)
+			root.SetArgs([]string{"demo", sc})
+
+			err := root.Execute()
+			if err == nil {
+				t.Fatalf("demo %s = nil, want error", sc)
+			}
+			if !strings.Contains(err.Error(), "not implemented yet") {
+				t.Errorf("demo %s error = %q, want not implemented", sc, err)
+			}
+		})
 	}
 }
