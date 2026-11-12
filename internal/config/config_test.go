@@ -74,3 +74,16 @@ func TestLoadFileOverride(t *testing.T) {
 		t.Errorf("registry = %q, want %q", cfg.Registry, "file.registry:6000")
 	}
 }
+
+func TestLoadMalformedFile(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "bad.yaml")
+	if err := os.WriteFile(path, []byte("cluster: [unclosed"), 0o600); err != nil {
+		t.Fatalf("writing config file: %v", err)
+	}
+
+	v := NewViper()
+	v.SetConfigFile(path)
+	if _, err := Load(v); err == nil {
+		t.Fatal("Load() = nil error, want an error for malformed config")
+	}
+}
