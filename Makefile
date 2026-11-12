@@ -1,5 +1,6 @@
 BINARY_NAME=srectl
 GO=go
+COVERAGE_MIN=80
 
 VERSION?=$(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
 COMMIT?=$(shell git rev-parse --short HEAD 2>/dev/null || echo none)
@@ -28,6 +29,16 @@ test:
 ## test-short: Run tests without the race detector
 test-short:
 	$(GO) test -short ./...
+
+## coverage: Report test coverage and fail if below the minimum
+coverage:
+	$(GO) test -coverprofile=coverage.out ./...
+	$(GO) tool cover -func=coverage.out | tail -1
+	@total=$$($(GO) tool cover -func=coverage.out | tail -1 | awk '{print $$3}' | tr -d '%'); \
+	if [ $$total -lt $(COVERAGE_MIN) ]; then \
+		echo "coverage $$total% is below the $(COVERAGE_MIN)% minimum"; exit 1; \
+	fi; \
+	echo "coverage $$total% >= $(COVERAGE_MIN)% OK"
 
 ## lint: Run golangci-lint
 lint:
