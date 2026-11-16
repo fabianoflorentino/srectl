@@ -286,6 +286,22 @@ func TestCredsCommand(t *testing.T) {
 	}
 }
 
+func TestOpenArgocd(t *testing.T) {
+	fakeBinaries(t, "", "")
+
+	var out bytes.Buffer
+	root := NewRootCommand()
+	root.SetOut(&out)
+	root.SetArgs([]string{"open", "argocd"})
+
+	if err := root.Execute(); err != nil {
+		t.Fatalf("execute open argocd: %v", err)
+	}
+	if !strings.Contains(out.String(), "argo-cd-argocd-server") {
+		t.Errorf("open argocd output = %q, want argo-cd-argocd-server", out.String())
+	}
+}
+
 func TestDemoScenarios(t *testing.T) {
 	for _, sc := range []string{"load", "chaos", "break", "verify", "error", "security", "certs", "projects"} {
 		t.Run(sc, func(t *testing.T) {

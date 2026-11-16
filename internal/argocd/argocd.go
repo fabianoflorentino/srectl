@@ -78,6 +78,11 @@ func (c *Client) ServerDeployment() string {
 	return serverDeployment
 }
 
+// ServerService returns the Argo CD server Service name.
+func (c *Client) ServerService() string {
+	return serverDeployment
+}
+
 // Bootstrap installs Argo CD (Helm), waits for it to be ready, and applies the
 // rendered root application. This is the single imperative step of the platform.
 func (c *Client) Bootstrap(ctx context.Context) error {
