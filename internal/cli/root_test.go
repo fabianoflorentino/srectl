@@ -272,19 +272,53 @@ func TestSyncCommand(t *testing.T) {
 	}
 }
 
-func TestCredsCommand(t *testing.T) {
+func TestCredsList(t *testing.T) {
 	fakeBinaries(t, "", "")
 
 	var out bytes.Buffer
 	root := NewRootCommand()
 	root.SetOut(&out)
-	root.SetArgs([]string{"creds", "--password", "newpass123"})
+	root.SetArgs([]string{"creds"})
 
 	if err := root.Execute(); err != nil {
 		t.Fatalf("execute creds: %v", err)
 	}
+	got := out.String()
+	for _, want := range []string{"argocd", "grafana", "admin", "password"} {
+		if !strings.Contains(got, want) {
+			t.Errorf("creds output = %q, want %q", got, want)
+		}
+	}
+}
+
+func TestCredsRotateArgocd(t *testing.T) {
+	fakeBinaries(t, "", "")
+
+	var out bytes.Buffer
+	root := NewRootCommand()
+	root.SetOut(&out)
+	root.SetArgs([]string{"creds", "rotate", "argocd", "--password", "newpass123"})
+
+	if err := root.Execute(); err != nil {
+		t.Fatalf("execute creds rotate argocd: %v", err)
+	}
 	if !strings.Contains(out.String(), "Argo CD admin password: newpass123") {
 		t.Errorf("creds output = %q", out.String())
+	}
+}
+
+func TestCredsRotateGrafanaIsGitOps(t *testing.T) {
+	fakeBinaries(t, "", "")
+
+	root := NewRootCommand()
+	root.SetArgs([]string{"creds", "rotate", "grafana"})
+
+	err := root.Execute()
+	if err == nil {
+		t.Fatal("execute creds rotate grafana: want error, got nil")
+	}
+	if !strings.Contains(err.Error(), "managed by GitOps") {
+		t.Errorf("error = %q, want a GitOps hint", err)
 	}
 }
 

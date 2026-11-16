@@ -18,6 +18,7 @@ type Config struct {
 	Cluster    Cluster    `mapstructure:"cluster"`
 	Components Components `mapstructure:"components"`
 	Argocd     Argocd     `mapstructure:"argocd"`
+	Monitoring Monitoring `mapstructure:"monitoring"`
 	Registry   string     `mapstructure:"registry"`
 }
 
@@ -43,6 +44,17 @@ type Argocd struct {
 	Version   string `mapstructure:"version"`
 	Repo      string `mapstructure:"repo"`
 	Revision  string `mapstructure:"revision"`
+}
+
+// Monitoring configures the observability stack (kube-prometheus-stack).
+type Monitoring struct {
+	Namespace string  `mapstructure:"namespace"`
+	Grafana   Grafana `mapstructure:"grafana"`
+}
+
+// Grafana identifies where the Grafana admin credentials live.
+type Grafana struct {
+	Secret string `mapstructure:"secret"`
 }
 
 // NewViper returns a viper instance configured for srectl: defaults, a YAML
@@ -75,6 +87,8 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("argocd.version", "10.18.0")
 	v.SetDefault("argocd.repo", "https://github.com/fabianoflorentino/srectl")
 	v.SetDefault("argocd.revision", "main")
+	v.SetDefault("monitoring.namespace", "monitoring")
+	v.SetDefault("monitoring.grafana.secret", "kube-prometheus-stack-grafana")
 	v.SetDefault("registry", "localhost:5000")
 }
 

@@ -5,7 +5,6 @@ package argocd
 import (
 	"bytes"
 	"context"
-	"crypto/rand"
 	_ "embed"
 	"encoding/base64"
 	"encoding/json"
@@ -18,6 +17,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/fabianoflorentino/srectl/internal/k8s"
+	"github.com/fabianoflorentino/srectl/internal/password"
 )
 
 //go:embed root-app.yaml
@@ -238,12 +238,12 @@ func (c *Client) Password(ctx context.Context) (string, error) {
 // RotatePassword updates the Argo CD admin password and returns the new value.
 // Argo CD authenticates against argocd-secret's bcrypt `admin.password`, so the
 // initial-admin secret is not what controls login after first boot.
-func (c *Client) RotatePassword(ctx context.Context, password string) (string, error) {
-	if password == "" {
-		password = randomPassword()
+func (c *Client) RotatePassword(ctx context.Context, newPassword string) (string, error) {
+	if newPassword == "" {
+		newPassword = password.Random(16)
 	}
 
-	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	hash, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
 	if err != nil {
 		return "", fmt.Errorf("hashing password: %w", err)
 	}
@@ -265,20 +265,5 @@ func (c *Client) RotatePassword(ctx context.Context, password string) (string, e
 	if err := c.k8s.Kubectl(ctx, "rollout", "restart", "deployment/"+c.ServerDeployment(), "-n", c.cfg.Namespace); err != nil {
 		return "", fmt.Errorf("restarting argocd-server: %w", err)
 	}
-	return password, nil
-}
-
-// randomPassword returns a short cryptographically-random alphanumeric password.
-func randomPassword() string {
-	const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-	const n = 16
-	buf := make([]byte, n)
-	if _, err := rand.Read(buf); err != nil {
-		return fmt.Sprintf("%x", time.Now().UnixNano())
-	}
-	var b strings.Builder
-	for _, v := range buf {
-		b.WriteByte(chars[int(v)%len(chars)])
-	}
-	return b.String()
+	return newPassword, nil
 }

@@ -19,4 +19,9 @@ argocd:
   repo: https://github.com/fabianoflorentino/srectl
   revision: main
 
+monitoring:
+  namespace: monitoring
+  grafana:
+    secret: kube-prometheus-stack-grafana
+
 registry: localhost:5000 # image registry for local builds

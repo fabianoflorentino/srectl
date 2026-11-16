@@ -29,7 +29,8 @@ srectl status        matriz de saúde: cluster + cada app do Argo CD
 srectl cluster       create/delete/status do cluster kind
 srectl bootstrap     instala o Argo CD + registra o root app
 srectl sync [app]    força o Argo CD a refrescar (padrão: todos)
-srectl creds         rotaciona a senha de admin do Argo CD
+srectl creds         mostra as credenciais de admin do Argo CD + Grafana
+srectl creds rotate  rotaciona a senha de um componente (`creds rotate argocd`)
 srectl open          port-forward de um serviço (argocd, grafana, prometheus, alertmanager, hello)
 srectl version       info de build
 ```
@@ -37,8 +38,11 @@ srectl version       info de build
 `srectl open` bloqueia em primeiro plano (Ctrl+C para parar); use `--daemon` para rodar
 em segundo plano e `--down` para parar (`srectl open argocd --daemon` → `srectl open argocd --down`).
 
-Comandos das fases seguintes (`demo`, `apps`, `trace`, `certs`, `logs`, `open grafana`)
-existem como stubs e reportam "not implemented yet".
+`srectl creds` imprime os logins de Argo CD e Grafana; Loki e Tempo rodam sem
+autenticação nesta stack local.
+
+Comandos das fases seguintes (`demo`, `apps`, `trace`, `certs`, `logs`) existem como
+stubs e reportam "not implemented yet".
 
 ## Fluxo do dia a dia
 
