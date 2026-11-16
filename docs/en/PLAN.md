@@ -127,12 +127,12 @@ Tasks:
 
 Tasks:
 
-- [ ] Install Argo CD (imperative bootstrap — this is the only imperative step).
-- [ ] Define the **root app** (`deploy/bootstrap/argocd/`) using app-of-apps.
-- [ ] Define `ApplicationSet`/`Application` CRs for each component group:
+- [x] Install Argo CD (imperative bootstrap — this is the only imperative step).
+- [x] Define the **root app** (`deploy/bootstrap/argocd/`) using app-of-apps.
+- [x] Define `ApplicationSet`/`Application` CRs for each component group:
       `observability`, `security`, `apps`, `projects`, `ingress`, `chaos`.
-- [ ] `srectl sync` + `srectl status` integrate with the Argo CD API.
-- [ ] Default credentials rotation + `srectl open argocd`.
+- [x] `srectl sync` + `srectl status` integrate with the Argo CD API.
+- [x] Default credentials rotation + `srectl open argocd`.
 
 **Acceptance criteria:**
 
