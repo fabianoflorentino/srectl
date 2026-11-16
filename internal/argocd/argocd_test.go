@@ -149,8 +149,11 @@ func TestRotatePassword(t *testing.T) {
 	if got != "newpass123" {
 		t.Errorf("RotatePassword = %q, want newpass123", got)
 	}
-	if !strings.Contains(out.String(), "patch secret argocd-initial-admin-secret") {
+	if !strings.Contains(out.String(), "patch secret argocd-secret") {
 		t.Errorf("RotatePassword output = %q", out.String())
+	}
+	if !strings.Contains(out.String(), "rollout restart deployment/argo-cd-argocd-server") {
+		t.Errorf("RotatePassword output = %q, want a server restart", out.String())
 	}
 }
 

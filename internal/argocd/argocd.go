@@ -236,6 +236,8 @@ func (c *Client) Password(ctx context.Context) (string, error) {
 }
 
 // RotatePassword updates the Argo CD admin password and returns the new value.
+// Argo CD authenticates against argocd-secret's bcrypt `admin.password`, so the
+// initial-admin secret is not what controls login after first boot.
 func (c *Client) RotatePassword(ctx context.Context, password string) (string, error) {
 	if password == "" {
 		password = randomPassword()
@@ -248,7 +250,6 @@ func (c *Client) RotatePassword(ctx context.Context, password string) (string, e
 
 	patch := map[string]any{
 		"stringData": map[string]string{
-			"password":            password,
 			"admin.password":      string(hash),
 			"admin.passwordMtime": time.Now().UTC().Format(time.RFC3339),
 		},
@@ -258,8 +259,11 @@ func (c *Client) RotatePassword(ctx context.Context, password string) (string, e
 		return "", fmt.Errorf("encoding password patch: %w", err)
 	}
 
-	if err := c.k8s.Kubectl(ctx, "patch", "secret", "argocd-initial-admin-secret", "-n", c.cfg.Namespace, "--type=merge", "-p", string(data)); err != nil {
+	if err := c.k8s.Kubectl(ctx, "patch", "secret", "argocd-secret", "-n", c.cfg.Namespace, "--type=merge", "-p", string(data)); err != nil {
 		return "", fmt.Errorf("rotating admin password: %w", err)
+	}
+	if err := c.k8s.Kubectl(ctx, "rollout", "restart", "deployment/"+c.ServerDeployment(), "-n", c.cfg.Namespace); err != nil {
+		return "", fmt.Errorf("restarting argocd-server: %w", err)
 	}
 	return password, nil
 }
