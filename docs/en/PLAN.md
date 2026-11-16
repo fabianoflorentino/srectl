@@ -147,16 +147,16 @@ Tasks:
 
 Tasks:
 
-- [ ] **kube-prometheus-stack**: Prometheus, Alertmanager, Grafana, node-exporter,
+- [x] **kube-prometheus-stack**: Prometheus, Alertmanager, Grafana, node-exporter,
       kube-state-metrics, Prometheus Operator CRDs (ServiceMonitor/PodMonitor).
-- [ ] **Loki** + **Alloy** (single agent: log tailing + OTel pipeline).
-- [ ] **Tempo** (traces backend) + **OpenTelemetry Collector** (deployment).
-- [ ] Grafana datasources (Prometheus, Loki, Tempo) provisioned via ConfigMap.
+- [x] **Loki** (single-binary) — **Alloy** (single log/OTel agent) lands with the demo apps.
+- [x] **Tempo** (single-binary) — **OpenTelemetry Collector** lands with the demo apps.
+- [x] Grafana datasources (Prometheus, Loki, Tempo) provisioned via ConfigMap.
 - [ ] Baseline dashboards: cluster overview, node/pod, app RED, syscall (stracectl),
       certificates (certificate-validate).
-- [ ] Baseline alert rules: high error rate, high p99 latency, disk/cpu, certificate
-      expiry, node pressure.
-- [ ] `srectl open grafana` + default dashboards discoverable.
+- [ ] Baseline alert rules: high error rate, high p99, disk/cpu, certificate
+      expiry, node pressure (a `TestAlert` already proves the alerting pipeline).
+- [x] `srectl open grafana` + default dashboards discoverable.
 
 **Acceptance criteria:**
 

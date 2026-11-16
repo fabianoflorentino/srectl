@@ -30,7 +30,7 @@ srectl cluster       create/delete/status do cluster kind
 srectl bootstrap     instala o Argo CD + registra o root app
 srectl sync [app]    força o Argo CD a refrescar (padrão: todos)
 srectl creds         rotaciona a senha de admin do Argo CD
-srectl open          port-forward de um serviço (argocd, hello)
+srectl open          port-forward de um serviço (argocd, grafana, prometheus, alertmanager, hello)
 srectl version       info de build
 ```
 

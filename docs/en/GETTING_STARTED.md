@@ -30,7 +30,7 @@ srectl cluster       create/delete/status the kind cluster
 srectl bootstrap     install Argo CD + register the root app
 srectl sync [app]    force Argo CD to refresh (default: all)
 srectl creds         rotate the Argo CD admin password
-srectl open          port-forward a service (argocd, hello)
+srectl open          port-forward a service (argocd, grafana, prometheus, alertmanager, hello)
 srectl version       build info
 ```
 
