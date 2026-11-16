@@ -13,4 +13,10 @@ components:
   apps: true
   projects: true
 
+argocd:
+  namespace: argocd
+  version: "10.18.0" # argo/argo-cd Helm chart version
+  repo: https://github.com/fabianoflorentino/srectl
+  revision: main
+
 registry: localhost:5000 # image registry for local builds

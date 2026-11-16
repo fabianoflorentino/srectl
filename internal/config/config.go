@@ -17,6 +17,7 @@ const EnvPrefix = "SRECTL"
 type Config struct {
 	Cluster    Cluster    `mapstructure:"cluster"`
 	Components Components `mapstructure:"components"`
+	Argocd     Argocd     `mapstructure:"argocd"`
 	Registry   string     `mapstructure:"registry"`
 }
 
@@ -34,6 +35,14 @@ type Components struct {
 	Chaos         bool `mapstructure:"chaos"`
 	Apps          bool `mapstructure:"apps"`
 	Projects      bool `mapstructure:"projects"`
+}
+
+// Argocd configures the GitOps engine and where it sources the repo.
+type Argocd struct {
+	Namespace string `mapstructure:"namespace"`
+	Version   string `mapstructure:"version"`
+	Repo      string `mapstructure:"repo"`
+	Revision  string `mapstructure:"revision"`
 }
 
 // NewViper returns a viper instance configured for srectl: defaults, a YAML
@@ -62,6 +71,10 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("components.chaos", true)
 	v.SetDefault("components.apps", true)
 	v.SetDefault("components.projects", true)
+	v.SetDefault("argocd.namespace", "argocd")
+	v.SetDefault("argocd.version", "10.18.0")
+	v.SetDefault("argocd.repo", "https://github.com/fabianoflorentino/srectl")
+	v.SetDefault("argocd.revision", "main")
 	v.SetDefault("registry", "localhost:5000")
 }
 
