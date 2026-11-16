@@ -71,6 +71,22 @@ e adiciona uma UX melhor (tabela de status, port-forward, progresso).
 | dashboard certificate-validate | `https://certificate-validate.localhost` |
 | visão ao vivo do stracectl | `srectl trace api-a` |
 
+## Logs (Loki)
+
+O Alloy faz o tail dos logs de todos os pods e os envia ao Loki com as labels
+`namespace`, `pod`, `container`, `app`, `node` e um `level` extraído. Consulte em
+**Grafana → Dashboards → `srectl · Logs`** (filtros: `namespace`, `search`) ou em
+**Explore → Loki** com LogQL:
+
+```logql
+{namespace="argocd"}                       # um namespace
+{namespace="monitoring", container="grafana"}
+{app="hello"}                              # pela label de app
+{level="error"}                            # pela label level extraída
+{namespace=~"argocd|monitoring"} |= "error"  # regex de namespace + grep de linha
+sum by (namespace) (count_over_time({level="error"}[5m]))
+```
+
 ## Cenários de demo
 
 ```text
