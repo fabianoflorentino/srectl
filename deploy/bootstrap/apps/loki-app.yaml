@@ -12,8 +12,21 @@ spec:
     helm:
       values: |
         deploymentMode: SingleBinary
+        read:
+          replicas: 0
+        write:
+          replicas: 0
+        backend:
+          replicas: 0
         loki:
           auth_enabled: false
+          useTestSchema: true
+          storage:
+            type: filesystem
+            bucketNames:
+              chunks: chunks
+              ruler: ruler
+              admin: admin
           commonConfig:
             replication_factor: 1
         singleBinary:

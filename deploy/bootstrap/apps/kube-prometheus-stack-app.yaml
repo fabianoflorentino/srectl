@@ -12,7 +12,7 @@ spec:
     helm:
       values: |
         crds:
-          enabled: false
+          enabled: true
         grafana:
           adminPassword: admin
         prometheus:
