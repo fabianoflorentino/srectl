@@ -30,6 +30,10 @@ test:
 test-short:
 	$(GO) test -short ./...
 
+## test-integration: Run integration tests against a running cluster
+test-integration:
+	$(GO) test -tags=integration ./internal/argocd/
+
 ## coverage: Report test coverage and fail if below the minimum
 coverage:
 	$(GO) test -coverprofile=coverage.out ./...
