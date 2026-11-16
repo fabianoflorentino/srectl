@@ -1,8 +1,8 @@
 # Começando
 
-> **Status: planejamento.** Este projeto ainda não foi implementado — veja
-> [`PLAN.md`](PLAN.md). Os comandos abaixo são a UX alvo quando as Fases 0–9 forem
-> concluídas.
+> **Status: em andamento.** As Fases 0–2 estão implementadas: o esqueleto da CLI,
+> o cluster kind com ingress/TLS e a fundação GitOps (app-of-apps do Argo CD). O
+> roteiro está em [`PLAN.md`](PLAN.md).
 
 ## Pré-requisitos
 
@@ -10,14 +10,32 @@
 - Docker (rodando)
 - kind, kubectl, helm no `PATH`
 - `srectl` buildado: `make build` (ou `go install ./cmd/srectl`)
+- O repo publicado num git que o Argo CD consiga clonar (veja `argocd.repo` abaixo)
 
 ## Um comando para subir
 
 ```bash
-srectl up          # cluster kind + argo cd + tudo (via GitOps)
-srectl status      # matriz de saúde
-srectl open grafana
+srectl up          # cluster kind + Argo CD + tudo (via GitOps)
+srectl status      # matriz de saúde (cluster + apps)
+srectl open argocd # port-forward da UI do Argo CD
 ```
+
+## O que funciona hoje (Fases 0–2)
+
+```text
+srectl up            cria cluster + bootstrap do Argo CD (idempotente)
+srectl down          derruba o cluster
+srectl status        matriz de saúde: cluster + cada app do Argo CD
+srectl cluster       create/delete/status do cluster kind
+srectl bootstrap     instala o Argo CD + registra o root app
+srectl sync [app]    força o Argo CD a refrescar (padrão: todos)
+srectl creds         rotaciona a senha de admin do Argo CD
+srectl open          port-forward de um serviço (argocd, hello)
+srectl version       info de build
+```
+
+Comandos das fases seguintes (`demo`, `apps`, `trace`, `certs`, `logs`, `open grafana`)
+existem como stubs e reportam "not implemented yet".
 
 ## Fluxo do dia a dia
 
@@ -82,8 +100,18 @@ components:
   apps: true
   projects: true
 
+argocd:
+  namespace: argocd
+  version: "10.18.0"  # versão do chart argo/argo-cd
+  repo: https://github.com/fabianoflorentino/srectl
+  revision: main
+
 registry: localhost:5000   # registry de imagens para builds locais
 ```
+
+> `argocd.repo` deve apontar para um repositório git que o Argo CD consiga clonar
+> (ex.: este repo publicado no GitHub). Para uma demo totalmente local, sirva o repo
+> com `git http-backend` e ajuste `SRECTL_ARGOCD_REPO`.
 
 ## Índice de documentação
 

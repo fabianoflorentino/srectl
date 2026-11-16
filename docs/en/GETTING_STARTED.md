@@ -1,7 +1,8 @@
 # Getting Started
 
-> **Status: planning.** This project is not implemented yet — see
-> [`PLAN.md`](PLAN.md). The commands below are the target UX once Phases 0–9 land.
+> **Status: in progress.** Phases 0–2 are implemented: the CLI skeleton, the kind
+> cluster with ingress/TLS, and the GitOps foundation (Argo CD app-of-apps). The
+> roadmap lives in [`PLAN.md`](PLAN.md).
 
 ## Prerequisites
 
@@ -9,14 +10,32 @@
 - Docker (running)
 - kind, kubectl, helm on `PATH`
 - `srectl` built: `make build` (or `go install ./cmd/srectl`)
+- The repo pushed to a git server Argo CD can reach (see `argocd.repo` below)
 
 ## One command up
 
 ```bash
-srectl up          # kind cluster + argo cd + everything (via GitOps)
-srectl status      # health matrix
-srectl open grafana
+srectl up          # kind cluster + Argo CD + everything (via GitOps)
+srectl status      # health matrix (cluster + apps)
+srectl open argocd # port-forward the Argo CD UI
 ```
+
+## What works today (Phases 0–2)
+
+```text
+srectl up            create cluster + bootstrap Argo CD (idempotent)
+srectl down          tear down the cluster
+srectl status        health matrix: cluster + every Argo CD app
+srectl cluster       create/delete/status the kind cluster
+srectl bootstrap     install Argo CD + register the root app
+srectl sync [app]    force Argo CD to refresh (default: all)
+srectl creds         rotate the Argo CD admin password
+srectl open          port-forward a service (argocd, hello)
+srectl version       build info
+```
+
+Commands for later phases (`demo`, `apps`, `trace`, `certs`, `logs`, `open grafana`)
+exist as stubs and report "not implemented yet".
 
 ## Everyday flow
 
@@ -81,8 +100,18 @@ components:
   apps: true
   projects: true
 
+argocd:
+  namespace: argocd
+  version: "10.18.0"  # argo/argo-cd Helm chart version
+  repo: https://github.com/fabianoflorentino/srectl
+  revision: main
+
 registry: localhost:5000   # image registry for local builds
 ```
+
+> `argocd.repo` must point at a git repository Argo CD can clone (e.g. this repo
+> pushed to GitHub). For a fully local demo you can serve the repo with
+> `git http-backend` and set `SRECTL_ARGOCD_REPO` accordingly.
 
 ## Documentation index
 
