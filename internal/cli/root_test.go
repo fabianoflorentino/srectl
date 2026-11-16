@@ -216,7 +216,7 @@ func TestStubCommands(t *testing.T) {
 		{"apps scale", []string{"apps", "scale"}, "not implemented yet (Phase 5)"},
 		{"trace", []string{"trace", "api-a"}, "not implemented yet (Phase 6)"},
 		{"certs", []string{"certs"}, "not implemented yet (Phase 6)"},
-		{"open grafana", []string{"open", "grafana"}, "not implemented yet (Phase 3)"},
+		{"open api-a", []string{"open", "api-a"}, "not implemented yet (Phase 5)"},
 		{"logs", []string{"logs", "api-a"}, "not implemented yet (Phase 5)"},
 	}
 
@@ -301,6 +301,22 @@ func TestOpenArgocd(t *testing.T) {
 	}
 	if !strings.Contains(out.String(), "argo-cd-argocd-server") {
 		t.Errorf("open argocd output = %q, want argo-cd-argocd-server", out.String())
+	}
+}
+
+func TestOpenGrafana(t *testing.T) {
+	fakeBinaries(t, "", "")
+
+	var out bytes.Buffer
+	root := NewRootCommand()
+	root.SetOut(&out)
+	root.SetArgs([]string{"open", "grafana"})
+
+	if err := root.Execute(); err != nil {
+		t.Fatalf("execute open grafana: %v", err)
+	}
+	if !strings.Contains(out.String(), "kube-prometheus-stack-grafana") {
+		t.Errorf("open grafana output = %q, want kube-prometheus-stack-grafana", out.String())
 	}
 }
 

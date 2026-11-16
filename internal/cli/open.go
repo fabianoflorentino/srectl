@@ -23,15 +23,18 @@ type openTarget struct {
 
 // openTargets are the non-Argo CD services reachable via `srectl open`.
 var openTargets = map[string]openTarget{
-	"hello": {namespace: "demo", resource: "svc/hello", port: 80, localPort: 8081, url: "http://localhost:8081"},
+	"hello":        {namespace: "demo", resource: "svc/hello", port: 80, localPort: 8081, url: "http://localhost:8081"},
+	"grafana":      {namespace: "monitoring", resource: "svc/kube-prometheus-stack-grafana", port: 80, localPort: 3000, url: "http://localhost:3000"},
+	"prometheus":   {namespace: "monitoring", resource: "svc/kube-prometheus-stack-prometheus", port: 9090, localPort: 9090, url: "http://localhost:9090"},
+	"alertmanager": {namespace: "monitoring", resource: "svc/kube-prometheus-stack-alertmanager", port: 9093, localPort: 9093, url: "http://localhost:9093"},
 }
 
 func newOpenCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:       "open <service>",
-		Short:     "Port-forward a service (argocd, hello)",
+		Short:     "Port-forward a service (argocd, grafana, prometheus, alertmanager, hello)",
 		Args:      cobra.ExactArgs(1),
-		ValidArgs: []string{"argocd", "hello"},
+		ValidArgs: []string{"argocd", "grafana", "prometheus", "alertmanager", "hello"},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			service := args[0]
 
@@ -50,7 +53,7 @@ func newOpenCommand() *cobra.Command {
 
 			target, ok := resolveOpenTarget(cmd, service)
 			if !ok {
-				return notImplemented("Phase 3")
+				return notImplemented("Phase 5")
 			}
 
 			client := k8s.New(k8s.WithStdout(cmd.OutOrStdout()), k8s.WithStderr(cmd.ErrOrStderr()))
