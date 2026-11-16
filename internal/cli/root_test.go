@@ -68,10 +68,9 @@ exit 0`)
 	writeExec(t, filepath.Join(dir, "kubectl"), `#!/bin/sh
 case "$1" in
   get)
-    if [ "$2" = "secret" ]; then echo "Zm9v"; else echo "1"; fi
-    ;;
-  create)
-    echo "apiVersion: v1"
+    if [ "$2" = "secret" ]; then echo "Zm9v"
+    elif [ "$2" = "applications" ]; then echo '{"items":[{"metadata":{"name":"root-app"},"status":{"sync":{"status":"Synced"},"health":{"status":"Healthy"}}}]}'
+    else echo "1"; fi
     ;;
   *)
     echo "$@"
@@ -163,8 +162,10 @@ func TestUpCommand(t *testing.T) {
 	if err := root.Execute(); err != nil {
 		t.Fatalf("execute up: %v", err)
 	}
-	if !strings.Contains(out.String(), "platform ready") {
-		t.Errorf("up output = %q, want platform ready", out.String())
+	for _, want := range []string{"platform ready", "upgrade --install argo-cd"} {
+		if !strings.Contains(out.String(), want) {
+			t.Errorf("up output missing %q, got %q", want, out.String())
+		}
 	}
 }
 
@@ -195,7 +196,7 @@ func TestStatusCommand(t *testing.T) {
 	if err := root.Execute(); err != nil {
 		t.Fatalf("execute status: %v", err)
 	}
-	for _, want := range []string{"cluster:", "up (3 nodes)", "ingress:", "Ready", "cert-manager:", "hello:"} {
+	for _, want := range []string{"cluster:", "up (3 nodes)", "argocd:", "Ready", "root-app:", "Synced", "Healthy"} {
 		if !strings.Contains(out.String(), want) {
 			t.Errorf("status output missing %q, got %q", want, out.String())
 		}
@@ -208,14 +209,12 @@ func TestStubCommands(t *testing.T) {
 		args    []string
 		wantErr string
 	}{
-		{"bootstrap", []string{"bootstrap"}, "not implemented yet (Phase 2)"},
-		{"sync", []string{"sync"}, "not implemented yet (Phase 2)"},
 		{"apps deploy", []string{"apps", "deploy"}, "not implemented yet (Phase 5)"},
 		{"apps restart", []string{"apps", "restart"}, "not implemented yet (Phase 5)"},
 		{"apps scale", []string{"apps", "scale"}, "not implemented yet (Phase 5)"},
 		{"trace", []string{"trace", "api-a"}, "not implemented yet (Phase 6)"},
 		{"certs", []string{"certs"}, "not implemented yet (Phase 6)"},
-		{"open", []string{"open", "grafana"}, "not implemented yet (Phase 1)"},
+		{"open grafana", []string{"open", "grafana"}, "not implemented yet (Phase 3)"},
 		{"logs", []string{"logs", "api-a"}, "not implemented yet (Phase 5)"},
 	}
 
@@ -234,6 +233,56 @@ func TestStubCommands(t *testing.T) {
 				t.Errorf("execute %v error = %q, want containing %q", tc.args, err, tc.wantErr)
 			}
 		})
+	}
+}
+
+func TestBootstrapCommand(t *testing.T) {
+	fakeBinaries(t, "", "")
+
+	var out bytes.Buffer
+	root := NewRootCommand()
+	root.SetOut(&out)
+	root.SetArgs([]string{"bootstrap"})
+
+	if err := root.Execute(); err != nil {
+		t.Fatalf("execute bootstrap: %v", err)
+	}
+	for _, want := range []string{"Argo CD bootstrapped", "upgrade --install argo-cd"} {
+		if !strings.Contains(out.String(), want) {
+			t.Errorf("bootstrap output missing %q, got %q", want, out.String())
+		}
+	}
+}
+
+func TestSyncCommand(t *testing.T) {
+	fakeBinaries(t, "", "")
+
+	var out bytes.Buffer
+	root := NewRootCommand()
+	root.SetOut(&out)
+	root.SetArgs([]string{"sync"})
+
+	if err := root.Execute(); err != nil {
+		t.Fatalf("execute sync: %v", err)
+	}
+	if !strings.Contains(out.String(), "refresh triggered for all apps") {
+		t.Errorf("sync output = %q", out.String())
+	}
+}
+
+func TestCredsCommand(t *testing.T) {
+	fakeBinaries(t, "", "")
+
+	var out bytes.Buffer
+	root := NewRootCommand()
+	root.SetOut(&out)
+	root.SetArgs([]string{"creds", "--password", "newpass123"})
+
+	if err := root.Execute(); err != nil {
+		t.Fatalf("execute creds: %v", err)
+	}
+	if !strings.Contains(out.String(), "Argo CD admin password: newpass123") {
+		t.Errorf("creds output = %q", out.String())
 	}
 }
 

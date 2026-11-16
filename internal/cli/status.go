@@ -2,10 +2,6 @@ package cli
 
 import (
 	"github.com/spf13/cobra"
-
-	"github.com/fabianoflorentino/srectl/internal/k8s"
-	"github.com/fabianoflorentino/srectl/internal/kind"
-	"github.com/fabianoflorentino/srectl/internal/platform"
 )
 
 func newStatusCommand() *cobra.Command {
@@ -15,10 +11,7 @@ func newStatusCommand() *cobra.Command {
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cfg := configFrom(cmd)
-			mgr := platform.New(
-				kind.New(kind.WithStdout(cmd.OutOrStdout()), kind.WithStderr(cmd.ErrOrStderr())),
-				k8s.New(k8s.WithStdout(cmd.OutOrStdout()), k8s.WithStderr(cmd.ErrOrStderr())),
-			)
+			mgr := newManager(cmd)
 			report, err := mgr.Status(cmd.Context(), cfg.Cluster.Name)
 			if err != nil {
 				return err

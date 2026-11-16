@@ -10,7 +10,10 @@ func newBootstrapCommand() *cobra.Command {
 		Short: "Install Argo CD and register the root app",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return notImplemented("Phase 2")
+			if err := newArgocd(cmd).Bootstrap(cmd.Context()); err != nil {
+				return err
+			}
+			return writef(cmd.OutOrStdout(), "Argo CD bootstrapped\n")
 		},
 	}
 }
