@@ -4,9 +4,12 @@ import (
 	"bytes"
 	"context"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
+	"syscall"
 	"testing"
+	"time"
 )
 
 // fakeBinary writes an executable shell script and returns its path.
@@ -139,5 +142,56 @@ func TestDeploymentAvailableError(t *testing.T) {
 
 	if _, err := c.DeploymentAvailable(context.Background(), "ns", "deploy"); err == nil {
 		t.Fatal("DeploymentAvailable = nil error, want an error")
+	}
+}
+
+func TestPortForwardDaemon(t *testing.T) {
+	argsFile := filepath.Join(t.TempDir(), "args.txt")
+	bin := fakeBinary(t, "kubectl", `echo "$@" > `+argsFile+`; sleep 60`)
+
+	c := New(WithKubectl(bin))
+	pid, err := c.PortForwardDaemon("demo", "svc/hello", 8080, 80)
+	if err != nil {
+		t.Fatalf("PortForwardDaemon: %v", err)
+	}
+	if pid <= 0 {
+		t.Fatalf("pid = %d, want > 0", pid)
+	}
+	t.Cleanup(func() { _ = StopPortForward(pid) })
+
+	deadline := time.Now().Add(5 * time.Second)
+	for time.Now().Before(deadline) {
+		if data, err := os.ReadFile(argsFile); err == nil && len(data) > 0 {
+			if !strings.Contains(string(data), "port-forward --namespace demo svc/hello 8080:80") {
+				t.Errorf("args = %q", string(data))
+			}
+			return
+		}
+		time.Sleep(50 * time.Millisecond)
+	}
+	t.Fatal("fake kubectl never wrote its args")
+}
+
+func TestStopPortForward(t *testing.T) {
+	cmd := exec.Command("sleep", "60")
+	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+	if err := cmd.Start(); err != nil {
+		t.Fatalf("start sleep: %v", err)
+	}
+	pid := cmd.Process.Pid
+
+	if err := StopPortForward(pid); err != nil {
+		t.Fatalf("StopPortForward: %v", err)
+	}
+	_ = cmd.Wait()
+
+	if err := syscall.Kill(pid, 0); err == nil {
+		t.Fatal("process still alive after StopPortForward")
+	}
+}
+
+func TestStopPortForwardUnknownPID(t *testing.T) {
+	if err := StopPortForward(99999999); err == nil {
+		t.Fatal("StopPortForward on unknown pid = nil, want an error")
 	}
 }

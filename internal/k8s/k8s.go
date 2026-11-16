@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"syscall"
 )
 
 // Client drives the kubectl and helm binaries on PATH.
@@ -79,6 +80,49 @@ func (c *Client) PortForward(ctx context.Context, namespace, resource string, lo
 		fmt.Sprintf("%d:%d", localPort, remotePort),
 	}
 	return c.run(ctx, c.kubectl, args...)
+}
+
+// PortForwardDaemon starts a detached `kubectl port-forward` in the background
+// and returns its PID. The process outlives this CLI so the user can keep the
+// tunnel open and stop it later with StopPortForward. Streams go to /dev/null
+// (not a pipe) so the child never dies of SIGPIPE when the CLI exits.
+func (c *Client) PortForwardDaemon(namespace, resource string, localPort, remotePort int) (int, error) {
+	args := []string{
+		"port-forward",
+		"--namespace", namespace,
+		resource,
+		fmt.Sprintf("%d:%d", localPort, remotePort),
+	}
+
+	devNull, err := os.OpenFile(os.DevNull, os.O_RDWR, 0)
+	if err != nil {
+		return 0, fmt.Errorf("opening %s: %w", os.DevNull, err)
+	}
+	defer func() { _ = devNull.Close() }()
+
+	//nolint:gosec // G204: srectl shells out to kubectl by design (fixed binary)
+	cmd := exec.Command(c.kubectl, args...)
+	cmd.Stdin = devNull
+	cmd.Stdout = devNull
+	cmd.Stderr = devNull
+	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+	if err := cmd.Start(); err != nil {
+		return 0, fmt.Errorf("%s %s: %w", c.kubectl, strings.Join(args, " "), err)
+	}
+	go func() { _ = cmd.Wait() }()
+	return cmd.Process.Pid, nil
+}
+
+// StopPortForward terminates a background port-forward process by PID.
+func StopPortForward(pid int) error {
+	proc, err := os.FindProcess(pid)
+	if err != nil {
+		return fmt.Errorf("finding process %d: %w", pid, err)
+	}
+	if err := proc.Signal(syscall.SIGTERM); err != nil {
+		return fmt.Errorf("stopping process %d: %w", pid, err)
+	}
+	return nil
 }
 
 // Apply runs `kubectl apply -f` for the given manifest paths (comma-joined).

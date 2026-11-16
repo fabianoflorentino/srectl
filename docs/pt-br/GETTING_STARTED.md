@@ -34,6 +34,9 @@ srectl open          port-forward de um serviço (argocd, hello)
 srectl version       info de build
 ```
 
+`srectl open` bloqueia em primeiro plano (Ctrl+C para parar); use `--daemon` para rodar
+em segundo plano e `--down` para parar (`srectl open argocd --daemon` → `srectl open argocd --down`).
+
 Comandos das fases seguintes (`demo`, `apps`, `trace`, `certs`, `logs`, `open grafana`)
 existem como stubs e reportam "not implemented yet".
 

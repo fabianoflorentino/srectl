@@ -1,6 +1,12 @@
 package cli
 
 import (
+	"fmt"
+	"os"
+	"path/filepath"
+	"strconv"
+	"strings"
+
 	"github.com/spf13/cobra"
 
 	"github.com/fabianoflorentino/srectl/internal/k8s"
@@ -12,32 +18,102 @@ type openTarget struct {
 	resource  string
 	port      int
 	localPort int
+	url       string
 }
 
 // openTargets are the non-Argo CD services reachable via `srectl open`.
 var openTargets = map[string]openTarget{
-	"hello": {namespace: "demo", resource: "svc/hello", port: 80, localPort: 8081},
+	"hello": {namespace: "demo", resource: "svc/hello", port: 80, localPort: 8081, url: "http://localhost:8081"},
 }
 
 func newOpenCommand() *cobra.Command {
-	return &cobra.Command{
+	cmd := &cobra.Command{
 		Use:       "open <service>",
 		Short:     "Port-forward a service (argocd, hello)",
 		Args:      cobra.ExactArgs(1),
 		ValidArgs: []string{"argocd", "hello"},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			client := k8s.New(k8s.WithStdout(cmd.OutOrStdout()), k8s.WithStderr(cmd.ErrOrStderr()))
+			service := args[0]
 
-			if args[0] == "argocd" {
-				ac := newArgocd(cmd)
-				return client.PortForward(cmd.Context(), ac.Namespace(), "svc/"+ac.ServerService(), 8080, 443)
+			daemon, err := cmd.Flags().GetBool("daemon")
+			if err != nil {
+				return err
+			}
+			down, err := cmd.Flags().GetBool("down")
+			if err != nil {
+				return err
 			}
 
-			target, ok := openTargets[args[0]]
+			if down {
+				return stopDaemon(service)
+			}
+
+			target, ok := resolveOpenTarget(cmd, service)
 			if !ok {
 				return notImplemented("Phase 3")
 			}
+
+			client := k8s.New(k8s.WithStdout(cmd.OutOrStdout()), k8s.WithStderr(cmd.ErrOrStderr()))
+
+			if daemon {
+				pid, err := client.PortForwardDaemon(target.namespace, target.resource, target.localPort, target.port)
+				if err != nil {
+					return err
+				}
+				if err := writePIDFile(service, pid); err != nil {
+					return err
+				}
+				return writef(cmd.OutOrStdout(), "%s port-forward running in background (pid %d) → %s\n", service, pid, target.url)
+			}
+
 			return client.PortForward(cmd.Context(), target.namespace, target.resource, target.localPort, target.port)
 		},
 	}
+	cmd.Flags().BoolP("daemon", "d", false, "run the port-forward in the background")
+	cmd.Flags().Bool("down", false, "stop a background port-forward")
+	return cmd
+}
+
+// resolveOpenTarget returns the port-forward target for a service. Argo CD's
+// namespace and service name come from the Argo CD config.
+func resolveOpenTarget(cmd *cobra.Command, service string) (openTarget, bool) {
+	if service == "argocd" {
+		ac := newArgocd(cmd)
+		return openTarget{
+			namespace: ac.Namespace(),
+			resource:  "svc/" + ac.ServerService(),
+			port:      443,
+			localPort: 8080,
+			url:       "https://localhost:8080",
+		}, true
+	}
+	t, ok := openTargets[service]
+	return t, ok
+}
+
+func pidFilePath(service string) string {
+	return filepath.Join(os.TempDir(), "srectl-port-forward-"+service+".pid")
+}
+
+func writePIDFile(service string, pid int) error {
+	return os.WriteFile(pidFilePath(service), []byte(strconv.Itoa(pid)), 0o600)
+}
+
+func readPIDFile(service string) (int, error) {
+	data, err := os.ReadFile(pidFilePath(service))
+	if err != nil {
+		return 0, fmt.Errorf("no background port-forward for %q: %w", service, err)
+	}
+	return strconv.Atoi(strings.TrimSpace(string(data)))
+}
+
+func stopDaemon(service string) error {
+	pid, err := readPIDFile(service)
+	if err != nil {
+		return err
+	}
+	if err := k8s.StopPortForward(pid); err != nil {
+		return err
+	}
+	return os.Remove(pidFilePath(service))
 }

@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/fabianoflorentino/srectl/internal/k8s"
 )
 
 func TestVersionCommand(t *testing.T) {
@@ -318,5 +320,59 @@ func TestDemoScenarios(t *testing.T) {
 				t.Errorf("demo %s error = %q, want not implemented", sc, err)
 			}
 		})
+	}
+}
+
+func TestOpenDaemonAndDown(t *testing.T) {
+	dir := t.TempDir()
+	writeExec(t, filepath.Join(dir, "kubectl"), "#!/bin/sh\nsleep 60\n")
+	t.Setenv("PATH", dir+":"+os.Getenv("PATH"))
+	_ = os.Remove(pidFilePath("hello"))
+
+	var out bytes.Buffer
+	root := NewRootCommand()
+	root.SetOut(&out)
+	root.SetArgs([]string{"open", "hello", "--daemon"})
+	if err := root.Execute(); err != nil {
+		t.Fatalf("open --daemon: %v", err)
+	}
+	if !strings.Contains(out.String(), "running in background") {
+		t.Errorf("open --daemon output = %q", out.String())
+	}
+	pid, err := readPIDFile("hello")
+	if err != nil {
+		t.Fatalf("PID file not written: %v", err)
+	}
+	t.Cleanup(func() {
+		_ = k8s.StopPortForward(pid)
+		_ = os.Remove(pidFilePath("hello"))
+	})
+
+	out.Reset()
+	root2 := NewRootCommand()
+	root2.SetOut(&out)
+	root2.SetArgs([]string{"open", "hello", "--down"})
+	if err := root2.Execute(); err != nil {
+		t.Fatalf("open --down: %v", err)
+	}
+	if _, err := os.Stat(pidFilePath("hello")); !os.IsNotExist(err) {
+		t.Error("PID file still exists after --down")
+	}
+}
+
+func TestOpenDownNoDaemon(t *testing.T) {
+	_ = os.Remove(pidFilePath("hello"))
+
+	root := NewRootCommand()
+	root.SetOut(io.Discard)
+	root.SetErr(io.Discard)
+	root.SetArgs([]string{"open", "hello", "--down"})
+
+	err := root.Execute()
+	if err == nil {
+		t.Fatal("open --down with no daemon = nil, want error")
+	}
+	if !strings.Contains(err.Error(), "no background port-forward") {
+		t.Errorf("error = %q", err)
 	}
 }
