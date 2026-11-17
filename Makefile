@@ -12,6 +12,9 @@ LDFLAGS=-ldflags "-X github.com/fabianoflorentino/srectl/internal/version.Versio
 
 .PHONY: all build clean test test-short lint lint-fix fmt docker-build install help
 
+.DEFAULT_GOAL := help
+
+## all: Run clean, lint, test and build everything
 all: clean lint test build
 
 ## build: Build the srectl binary
