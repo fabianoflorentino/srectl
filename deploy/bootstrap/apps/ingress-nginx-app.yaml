@@ -24,6 +24,8 @@ spec:
               effect: NoSchedule
           service:
             type: NodePort
+          updateStrategy:
+            type: Recreate
           metrics:
             enabled: true
             serviceMonitor:
