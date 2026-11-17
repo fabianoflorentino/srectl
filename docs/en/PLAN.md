@@ -154,7 +154,7 @@ Tasks:
 - [x] **Tempo** (single-binary) — **OpenTelemetry Collector** lands with the demo apps.
 - [x] Grafana datasources (Prometheus, Loki, Tempo) provisioned via ConfigMap.
 - [ ] Baseline dashboards: cluster overview, node/pod, app RED, syscall (stracectl),
-      certificates (certificate-validate). (a `srectl · Logs` dashboard exists)
+      certificates (certificate-validate). (`srectl · Logs` and `srectl · Golden Signals` dashboards exist)
 - [ ] Baseline alert rules: high error rate, high p99, disk/cpu, certificate
       expiry, node pressure (a `TestAlert` already proves the alerting pipeline).
 - [x] `srectl open grafana` + default dashboards discoverable.

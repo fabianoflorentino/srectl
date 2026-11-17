@@ -87,6 +87,17 @@ Alloy tails every pod's logs and ships them to Loki with the labels `namespace`,
 sum by (namespace) (count_over_time({level="error"}[5m]))
 ```
 
+## Golden signals (Prometheus)
+
+`srectl · Golden Signals` (Grafana → Dashboards) covers the four golden signals,
+fed by ingress-nginx (traffic/latency/errors) and node-exporter + kube-state-metrics
+(saturation):
+
+- **Traffic** — `sum(rate(nginx_ingress_controller_requests[5m]))`
+- **Errors** — `100 * sum(rate(nginx_ingress_controller_requests{status=~"5.."}[5m])) / sum(rate(nginx_ingress_controller_requests[5m]))`
+- **Latency** — `histogram_quantile(0.99, sum by (le) (rate(nginx_ingress_controller_request_duration_seconds_bucket[5m])))`
+- **Saturation** — node CPU / memory / filesystem % and top namespaces by CPU / memory
+
 ## Demo scenarios
 
 ```text
