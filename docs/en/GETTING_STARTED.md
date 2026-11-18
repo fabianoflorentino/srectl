@@ -98,6 +98,10 @@ fed by ingress-nginx (traffic/latency/errors) and node-exporter + kube-state-met
 - **Latency** — `histogram_quantile(0.99, sum by (le) (rate(nginx_ingress_controller_request_duration_seconds_bucket[5m])))`
 - **Saturation** — node CPU / memory / filesystem % and top namespaces by CPU / memory
 
+A cluster-wide view lives in **`srectl · Cluster`** (nodes ready, pods running,
+restarts, CPU/memory used vs allocatable, top pods). `kubectl top nodes` and
+`kubectl top pods` are backed by metrics-server.
+
 ## Security
 
 - **Kyverno** enforces baseline policies (CEL `ValidatingPolicy`) in the `demo`

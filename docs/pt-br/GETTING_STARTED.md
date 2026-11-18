@@ -98,6 +98,10 @@ kube-state-metrics (saturação):
 - **Latência** — `histogram_quantile(0.99, sum by (le) (rate(nginx_ingress_controller_request_duration_seconds_bucket[5m])))`
 - **Saturação** — % de CPU / memória / filesystem dos nós e top namespaces por CPU / memória
 
+Uma visão de todo o cluster fica em **`srectl · Cluster`** (nós prontos, pods rodando,
+restarts, CPU/memória usados vs alocáveis, top pods). `kubectl top nodes` e
+`kubectl top pods` usam o metrics-server.
+
 ## Segurança
 
 - **Kyverno** aplica políticas baseline (CEL `ValidatingPolicy`) no namespace `demo`:
