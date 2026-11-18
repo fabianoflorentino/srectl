@@ -1,0 +1,86 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: srectl-dashboard-certificates
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
+  srectl-certificates.json: |
+    {
+      "annotations": { "list": [] },
+      "tags": ["sre"],
+      "editable": true,
+      "graphTooltip": 0,
+      "title": "srectl · Certificates",
+      "uid": "srectl-certificates",
+      "schemaVersion": 39,
+      "version": 1,
+      "refresh": "1m",
+      "time": { "from": "now-24h", "to": "now" },
+      "panels": [
+        {
+          "id": 1,
+          "type": "stat",
+          "title": "Certificates expiring < 15 days",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "gridPos": { "h": 6, "w": 6, "x": 0, "y": 0 },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null }, { "color": "red", "value": 1 } ] }
+            },
+            "overrides": []
+          },
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value" },
+          "targets": [
+            { "refId": "A", "expr": "count(min by (namespace,kind,name) (certificate_days_left) < 15)" }
+          ]
+        },
+        {
+          "id": 2,
+          "type": "stat",
+          "title": "Certificates expired",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "gridPos": { "h": 6, "w": 6, "x": 6, "y": 0 },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null }, { "color": "red", "value": 1 } ] }
+            },
+            "overrides": []
+          },
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value" },
+          "targets": [
+            { "refId": "A", "expr": "count(min by (namespace,kind,name) (certificate_days_left) <= 0)" }
+          ]
+        },
+        {
+          "id": 3,
+          "type": "timeseries",
+          "title": "Days left over time (min per certificate)",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "gridPos": { "h": 6, "w": 12, "x": 12, "y": 0 },
+          "fieldConfig": { "defaults": { "unit": "short" }, "overrides": [] },
+          "targets": [
+            { "refId": "A", "expr": "min by (namespace,name) (certificate_days_left)", "legendFormat": "{{namespace}}/{{name}}" }
+          ]
+        },
+        {
+          "id": 4,
+          "type": "bargauge",
+          "title": "Days left by certificate",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "gridPos": { "h": 12, "w": 24, "x": 0, "y": 6 },
+          "fieldConfig": { "defaults": { "unit": "short" }, "overrides": [] },
+          "options": { "orientation": "horizontal", "displayMode": "gradient" },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "min by (namespace,kind,name) (certificate_days_left)",
+              "legendFormat": "{{namespace}}/{{name}} ({{kind}})"
+            }
+          ]
+        }
+      ]
+    }
