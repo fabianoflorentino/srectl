@@ -9,6 +9,7 @@ data:
   srectl-security.json: |
     {
       "annotations": { "list": [] },
+      "tags": ["sre"],
       "editable": true,
       "graphTooltip": 0,
       "title": "srectl · Security",

@@ -9,6 +9,7 @@ data:
   srectl-golden-signals.json: |
     {
       "annotations": { "list": [] },
+      "tags": ["sre"],
       "editable": true,
       "graphTooltip": 1,
       "title": "srectl · Golden Signals",
