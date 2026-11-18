@@ -46,3 +46,12 @@ skill is choosing the right vantage point per workload — and correlating them 
 
 fraudctl throughput/latency in Golden Signals, stracectl syscall metrics in Prometheus, and
 certificate days-left in Grafana — all in the same UI.
+
+## seraph — static status board
+
+```bash
+srectl open seraph     # http://localhost:8085
+```
+
+A pinned-image nginx service that serves a status snapshot (`/data/state.json`)
+refreshed by `seraph sync`. Viewed through ingress-nginx RED metrics and Loki; no `/metrics`.

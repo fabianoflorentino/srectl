@@ -90,6 +90,14 @@ Legenda — método de instalação:
 - `srectl trace` embrulha `stracectl discover` / `attach` para debug interativo.
 - Demonstra *observabilidade profunda*: do nível de syscall até os traces.
 
+### seraph
+
+- Um **status board estático** (site Hugo + snapshot `state.json`) servido por nginx.
+- Empacotado como container, pinado como `fabianoflorentino/seraph:v0.1.1`; um
+  `seraph sync` em background atualiza o snapshot de status oficiais a cada 5 minutos.
+- Atrás do ingress (`seraph.localhost`) → `srectl open seraph`; observado pelas métricas
+  RED do ingress-nginx e pelo Loki (sem `/metrics` nativo).
+
 ## Por que não ...
 
 - **OPA/Gatekeeper em vez de Kyverno:** Kyverno é nativo do Kubernetes e mais simples de

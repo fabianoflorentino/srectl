@@ -228,6 +228,8 @@ Tasks:
 - [x] **stracectl** (`deploy/projects/stracectl/`): dedicated demo pod + sidecar
       (`attach --serve :8080`), syscall metrics → Prometheus, syscall dashboard;
       `srectl trace` port-forwards the live view.
+- [x] **seraph** (`deploy/projects/seraph/`): static status board (pinned image) behind
+      ingress; `srectl open seraph`.
 - [x] Alert rules: `certificate_days_left < 15` (CertificateExpiringSoon/Expired);
       syscall anomaly counters deferred.
 - [ ] `srectl demo projects` — an end-to-end script that touches all three.

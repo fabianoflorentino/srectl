@@ -14,6 +14,6 @@ description: "Cada componente, por que existe e como é instalado."
 | Métricas de cluster | metrics-server, node-exporter, kube-state-metrics | `kubectl top`, saturação, estado dos objetos |
 | Segurança | Kyverno, Trivy Operator, Falco | Política, scans de vuln/config, detecção em runtime |
 | Caos | chaos-mesh | Drills de pod kill e stress de CPU |
-| Demo | api-a, api-b, hello, fraudctl | Workloads que geram sinal |
+| Demo | api-a, api-b, hello, fraudctl, seraph | Workloads que geram sinal |
 
 As versões ficam em `deploy/bootstrap/apps/*.yaml` (`targetRevision` do Helm).

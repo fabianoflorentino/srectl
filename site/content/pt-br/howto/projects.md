@@ -46,3 +46,12 @@ tudo num lugar (Grafana) para o incidente ser uma investigação, não cinco.
 
 Throughput/latência do fraudctl no Golden Signals, métricas de syscall do stracectl no Prometheus
 e dias-restantes de certificados no Grafana — tudo na mesma UI.
+
+## seraph — status board estático
+
+```bash
+srectl open seraph     # http://localhost:8085
+```
+
+Serviço nginx com imagem pinada que serve um snapshot de status (`/data/state.json`)
+atualizado pelo `seraph sync`. Observado pelas métricas RED do ingress-nginx e Loki; sem `/metrics`.
