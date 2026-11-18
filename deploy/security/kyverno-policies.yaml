@@ -1,105 +1,128 @@
-# Baseline Kyverno policies, scoped to the demo namespace so they demonstrate
-# enforcement without blocking platform components.
-apiVersion: kyverno.io/v1
-kind: ClusterPolicy
+# Baseline Kyverno CEL policies (Kyverno >= 1.20), scoped to the demo namespace so
+# they demonstrate enforcement without blocking platform components.
+apiVersion: policies.kyverno.io/v1
+kind: ValidatingPolicy
 metadata:
   name: disallow-latest-tag
 spec:
-  validationFailureAction: Enforce
-  background: true
-  rules:
-    - name: require-image-tag
-      match:
-        any:
-          - resources:
-              kinds:
-                - Pod
-              namespaces:
-                - demo
-      validate:
-        message: "An explicit image tag is required and 'latest' is not allowed."
-        deny:
-          conditions:
-            any:
-              - key: "{{ images.containers.*.tag }}"
-                operator: AnyIn
-                value:
-                  - "latest"
-                  - ""
+  evaluation:
+    admission:
+      enabled: true
+    background:
+      enabled: true
+  validationActions:
+    - Deny
+  matchConstraints:
+    resourceRules:
+      - apiGroups:
+          - ""
+        apiVersions:
+          - v1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - pods
+  matchConditions:
+    - name: only-demo-namespace
+      expression: object.metadata.namespace == 'demo'
+  validations:
+    - expression: >-
+        object.spec.containers.all(c, !c.image.endsWith(':latest')) &&
+        object.spec.?initContainers.orValue([]).all(c, !c.image.endsWith(':latest'))
+      message: "The 'latest' image tag is not allowed; pin a specific tag."
 ---
-apiVersion: kyverno.io/v1
-kind: ClusterPolicy
+apiVersion: policies.kyverno.io/v1
+kind: ValidatingPolicy
 metadata:
   name: require-requests-limits
 spec:
-  validationFailureAction: Enforce
-  background: true
-  rules:
-    - name: validate-resources
-      match:
-        any:
-          - resources:
-              kinds:
-                - Pod
-              namespaces:
-                - demo
-      validate:
-        message: "CPU and memory requests and limits are required."
-        pattern:
-          spec:
-            containers:
-              - resources:
-                  requests:
-                    cpu: "?*"
-                    memory: "?*"
-                  limits:
-                    cpu: "?*"
-                    memory: "?*"
+  evaluation:
+    admission:
+      enabled: true
+    background:
+      enabled: true
+  validationActions:
+    - Deny
+  matchConstraints:
+    resourceRules:
+      - apiGroups:
+          - ""
+        apiVersions:
+          - v1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - pods
+  matchConditions:
+    - name: only-demo-namespace
+      expression: object.metadata.namespace == 'demo'
+  validations:
+    - expression: >-
+        object.spec.containers.all(c,
+          c.?resources.?requests.?cpu.orValue('') != '' &&
+          c.?resources.?requests.?memory.orValue('') != '' &&
+          c.?resources.?limits.?cpu.orValue('') != '' &&
+          c.?resources.?limits.?memory.orValue('') != '')
+      message: "CPU and memory requests and limits are required."
 ---
-apiVersion: kyverno.io/v1
-kind: ClusterPolicy
+apiVersion: policies.kyverno.io/v1
+kind: ValidatingPolicy
 metadata:
   name: require-run-as-nonroot
 spec:
-  validationFailureAction: Audit
-  background: true
-  rules:
-    - name: check-runasnonroot
-      match:
-        any:
-          - resources:
-              kinds:
-                - Pod
-              namespaces:
-                - demo
-      validate:
-        message: "Pods must set securityContext.runAsNonRoot=true."
-        pattern:
-          spec:
-            securityContext:
-              runAsNonRoot: true
+  evaluation:
+    admission:
+      enabled: true
+    background:
+      enabled: true
+  validationActions:
+    - Audit
+  matchConstraints:
+    resourceRules:
+      - apiGroups:
+          - ""
+        apiVersions:
+          - v1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - pods
+  matchConditions:
+    - name: only-demo-namespace
+      expression: object.metadata.namespace == 'demo'
+  validations:
+    - expression: "object.spec.?securityContext.?runAsNonRoot.orValue(false) == true"
+      message: "Pods must set securityContext.runAsNonRoot=true."
 ---
-apiVersion: kyverno.io/v1
-kind: ClusterPolicy
+apiVersion: policies.kyverno.io/v1
+kind: ValidatingPolicy
 metadata:
   name: disallow-hostpath
 spec:
-  validationFailureAction: Enforce
-  background: true
-  rules:
-    - name: block-hostpath
-      match:
-        any:
-          - resources:
-              kinds:
-                - Pod
-              namespaces:
-                - demo
-      validate:
-        message: "hostPath volumes are not allowed."
-        deny:
-          conditions:
-            any:
-              - key: "{{ request.object.spec.volumes[?hostPath].hostPath | length(@) }}"
-                operator: GreaterThan
-                value: 0
+  evaluation:
+    admission:
+      enabled: true
+    background:
+      enabled: true
+  validationActions:
+    - Deny
+  matchConstraints:
+    resourceRules:
+      - apiGroups:
+          - ""
+        apiVersions:
+          - v1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - pods
+  matchConditions:
+    - name: only-demo-namespace
+      expression: object.metadata.namespace == 'demo'
+  validations:
+    - expression: "object.spec.?volumes.orValue([]).all(v, !has(v.hostPath))"
+      message: "hostPath volumes are not allowed."
