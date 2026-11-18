@@ -1,0 +1,127 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: srectl-dashboard-security
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
+  srectl-security.json: |
+    {
+      "annotations": { "list": [] },
+      "editable": true,
+      "graphTooltip": 0,
+      "title": "srectl · Security",
+      "uid": "srectl-security",
+      "schemaVersion": 39,
+      "version": 1,
+      "refresh": "1m",
+      "time": { "from": "now-24h", "to": "now" },
+      "panels": [
+        {
+          "id": 1,
+          "type": "piechart",
+          "title": "Image vulnerabilities by severity",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "gridPos": { "h": 8, "w": 8, "x": 0, "y": 0 },
+          "options": {
+            "pieType": "donut",
+            "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+            "legend": { "displayMode": "list", "placement": "right", "showLegend": true },
+            "tooltip": { "mode": "single" }
+          },
+          "targets": [
+            { "refId": "A", "expr": "sum by (severity) (trivy_image_vulnerabilities)", "legendFormat": "{{severity}}" }
+          ]
+        },
+        {
+          "id": 2,
+          "type": "bargauge",
+          "title": "Top vulnerable images (CRITICAL + HIGH)",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "gridPos": { "h": 8, "w": 8, "x": 8, "y": 0 },
+          "fieldConfig": { "defaults": { "unit": "short" }, "overrides": [] },
+          "options": { "orientation": "horizontal", "displayMode": "gradient" },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "topk(5, sum by (image_repository) (trivy_image_vulnerabilities{severity=~\"CRITICAL|HIGH\"}))",
+              "legendFormat": "{{image_repository}}"
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "type": "stat",
+          "title": "Exposed secrets (images)",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "gridPos": { "h": 8, "w": 8, "x": 16, "y": 0 },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null }, { "color": "red", "value": 1 } ] }
+            },
+            "overrides": []
+          },
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value" },
+          "targets": [
+            { "refId": "A", "expr": "sum(trivy_image_exposedsecrets)" }
+          ]
+        },
+        {
+          "id": 4,
+          "type": "bargauge",
+          "title": "Config audit findings by severity",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "gridPos": { "h": 8, "w": 8, "x": 0, "y": 8 },
+          "fieldConfig": { "defaults": { "unit": "short" }, "overrides": [] },
+          "options": { "orientation": "horizontal", "displayMode": "gradient" },
+          "targets": [
+            { "refId": "A", "expr": "sum by (severity) (trivy_resource_configaudits)", "legendFormat": "{{severity}}" }
+          ]
+        },
+        {
+          "id": 5,
+          "type": "bargauge",
+          "title": "RBAC assessment findings by severity",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "gridPos": { "h": 8, "w": 8, "x": 8, "y": 8 },
+          "fieldConfig": { "defaults": { "unit": "short" }, "overrides": [] },
+          "options": { "orientation": "horizontal", "displayMode": "gradient" },
+          "targets": [
+            { "refId": "A", "expr": "sum by (severity) (trivy_clusterrole_clusterrbacassessments)", "legendFormat": "{{severity}}" }
+          ]
+        },
+        {
+          "id": 6,
+          "type": "timeseries",
+          "title": "Kyverno policy failures by namespace",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "gridPos": { "h": 8, "w": 8, "x": 16, "y": 8 },
+          "fieldConfig": { "defaults": { "unit": "short" }, "overrides": [] },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "sum by (resource_namespace) (kyverno_validating_policy_results_total{result=\"fail\"})",
+              "legendFormat": "{{resource_namespace}}"
+            }
+          ]
+        },
+        {
+          "id": 7,
+          "type": "bargauge",
+          "title": "Kyverno policy results (policy / result)",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "gridPos": { "h": 8, "w": 24, "x": 0, "y": 16 },
+          "fieldConfig": { "defaults": { "unit": "short" }, "overrides": [] },
+          "options": { "orientation": "horizontal", "displayMode": "gradient" },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "sum by (policy_name, result) (kyverno_validating_policy_results_total)",
+              "legendFormat": "{{policy_name}} / {{result}}"
+            }
+          ]
+        }
+      ]
+    }
