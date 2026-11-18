@@ -140,6 +140,9 @@ srectl demo load --duration 30s --rps 20   # generate traffic (mix of /orders, /
 
 ## Demo scenarios
 
+On kind, `srectl demo chaos` uses CPU stress (latency) and pod-kill; NetworkChaos/DNSChaos
+need iptables and are unsupported. `srectl demo verify` asserts the stack is healthy.
+
 ```text
 srectl demo load      # k6/go hammer → RED dashboards light up
 srectl demo error     # force errors → HighErrorRate alert fires

@@ -254,13 +254,12 @@ Tarefas:
 
 - [x] **chaos-mesh** instalado + CRDs. PodChaos + StressChaos validados; NetworkChaos/
       DNSChaos (iptables/ipset) não funcionam no kind (containers aninhados).
-- [ ] Cenários `srectl demo chaos`: os manifestos de latência (stress de CPU na api-a) e
-      pod-kill (fraudctl) estão em `deploy/chaos/`; o wiring da CLI `demo chaos` está pendente.
-      DNS/perda de pacotes exigem NetworkChaos, indisponível no kind.
+- [x] `srectl demo chaos [latency|pod-kill]` (manifestos embutidos; latência = stress de CPU
+      na api-a, pod-kill = fraudctl). DNS/perda de pacotes exigem NetworkChaos, indisponível no kind.
 - [x] Regras de gravação SLO/SLI + alertas `ApiAHighErrorRate` / `ApiAHighLatency`
       (`deploy/observability/slo-rules.yaml`).
 - [x] Runbooks (`docs/en/runbooks/`, `docs/pt-br/runbooks/`) para os principais alertas.
-- [ ] `srectl demo verify` — valida que a stack se recupera e os alertas disparam. (pendente)
+- [x] `srectl demo verify` — valida cluster up, Argo CD pronto e todos os apps Synced·Healthy.
 
 **Critérios de aceite:**
 

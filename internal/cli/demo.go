@@ -7,24 +7,25 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/fabianoflorentino/srectl/internal/chaos"
 	"github.com/fabianoflorentino/srectl/internal/demo"
+	"github.com/fabianoflorentino/srectl/internal/k8s"
+	"github.com/fabianoflorentino/srectl/internal/verify"
 )
 
 func newDemoCommand() *cobra.Command {
 	demoCmd := &cobra.Command{
 		Use:   "demo",
-		Short: "Run a demo scenario (load, chaos, break, verify, error, security, certs, projects)",
+		Short: "Run a demo scenario (load, chaos, verify, error, security, certs, projects)",
 	}
-	demoCmd.AddCommand(newDemoLoadCommand())
+	demoCmd.AddCommand(newDemoLoadCommand(), newDemoChaosCommand(), newDemoVerifyCommand())
 
 	scenarios := []struct {
 		use      string
 		short    string
 		scenario demo.Scenario
 	}{
-		{"chaos", "Inject latency and kill pods", demo.ScenarioChaos},
 		{"break", "Break a component", demo.ScenarioBreak},
-		{"verify", "Assert the stack recovers and alerts fire", demo.ScenarioVerify},
 		{"error", "Force errors to fire the high-error-rate alert", demo.ScenarioError},
 		{"security", "Show trivy report, kyverno violation and falco event", demo.ScenarioSecurity},
 		{"certs", "Run the certificate-validate scan", demo.ScenarioCerts},
@@ -81,6 +82,56 @@ func newDemoLoadCommand() *cobra.Command {
 	cmd.Flags().Duration("duration", 30*time.Second, "load duration")
 	cmd.Flags().Int("rps", 20, "approximate requests per second")
 	return cmd
+}
+
+func newDemoChaosCommand() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "chaos [latency|pod-kill]",
+		Short: "Inject chaos (latency via CPU stress, or pod-kill) and clean up",
+		Args:  cobra.MaximumNArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			scenario := chaos.ScenarioLatency
+			if len(args) > 0 {
+				scenario = chaos.Scenario(args[0])
+			}
+			duration, err := cmd.Flags().GetDuration("duration")
+			if err != nil {
+				return err
+			}
+
+			client := k8s.New(k8s.WithStdout(cmd.OutOrStdout()), k8s.WithStderr(cmd.ErrOrStderr()))
+			if err := writef(cmd.OutOrStdout(), "injecting chaos %q for %s ...\n", scenario, duration); err != nil {
+				return err
+			}
+			if err := chaos.Run(cmd.Context(), client, scenario, duration); err != nil {
+				return err
+			}
+			return writef(cmd.OutOrStdout(), "chaos %q recovered\n", scenario)
+		},
+	}
+	cmd.Flags().Duration("duration", 60*time.Second, "chaos duration")
+	return cmd
+}
+
+func newDemoVerifyCommand() *cobra.Command {
+	return &cobra.Command{
+		Use:   "verify",
+		Short: "Assert the cluster, Argo CD and every app are healthy",
+		Args:  cobra.NoArgs,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cfg := configFrom(cmd)
+			report, err := newManager(cmd).Status(cmd.Context(), cfg.Cluster.Name)
+			if err != nil {
+				return err
+			}
+			if err := verify.Assess(report); err != nil {
+				_ = report.Write(cmd.OutOrStdout())
+				return err
+			}
+			return writef(cmd.OutOrStdout(),
+				"verify: OK — cluster up, argocd ready, %d apps Synced · Healthy\n", len(report.Apps))
+		},
+	}
 }
 
 // insecureClient returns an HTTP client that tolerates the local self-signed CA.

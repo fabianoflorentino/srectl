@@ -248,13 +248,12 @@ Tasks:
 
 - [x] **chaos-mesh** install + CRDs. PodChaos + StressChaos validated; NetworkChaos/
       DNSChaos (iptables/ipset) do not work on kind's nested containers.
-- [ ] `srectl demo chaos` scenarios: latency (CPU stress on api-a) and pod-kill (fraudctl)
-      manifests are ready in `deploy/chaos/`; CLI `demo chaos` wiring pending. DNS/packet-loss
-      need NetworkChaos, unsupported on kind.
+- [x] `srectl demo chaos [latency|pod-kill]` (embedded manifests; latency = CPU stress on
+      api-a, pod-kill = fraudctl). DNS/packet-loss need NetworkChaos, unsupported on kind.
 - [x] SLO/SLI recording rules + `ApiAHighErrorRate` / `ApiAHighLatency` alerts
       (`deploy/observability/slo-rules.yaml`).
 - [x] Runbooks (`docs/en/runbooks/`, `docs/pt-br/runbooks/`) for the top alerts.
-- [ ] `srectl demo verify` — asserts the stack recovers and alerts fire. (pending)
+- [x] `srectl demo verify` — asserts cluster up, Argo CD ready and every app Synced·Healthy.
 
 **Acceptance criteria:**
 
