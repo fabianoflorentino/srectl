@@ -46,9 +46,13 @@ enableRobotsTXT = true
         pageRef = "/tutorials"
         weight = 7
       [[languages.en.menu.main]]
+        name = "How-to"
+        pageRef = "/howto"
+        weight = 8
+      [[languages.en.menu.main]]
         name = "Runbooks"
         pageRef = "/runbooks"
-        weight = 8
+        weight = 9
 
   [languages.pt-br]
     locale = "pt-BR"
@@ -88,9 +92,13 @@ enableRobotsTXT = true
         pageRef = "/tutorials"
         weight = 7
       [[languages.pt-br.menu.main]]
+        name = "Guias"
+        pageRef = "/howto"
+        weight = 8
+      [[languages.pt-br.menu.main]]
         name = "Runbooks"
         pageRef = "/runbooks"
-        weight = 8
+        weight = 9
 
 [params]
   github = "https://github.com/fabianoflorentino/srectl"

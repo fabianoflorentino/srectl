@@ -40,3 +40,5 @@ Grafana → Explore → **Loki** → `{namespace="demo"} |= "shadow"`.
 
 Grafana → `srectl · Certificates`: days left per certificate, sourced from
 certificate-validate's `certificate_days_left`.
+
+> Prefer concept-first pages? See the **[how-tos](../howto/)** — one per simulation.
