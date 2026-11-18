@@ -27,7 +27,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: seraph
-          image: fabianoflorentino/seraph:v0.1.0
+          image: fabianoflorentino/seraph:v0.1.1
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
@@ -35,8 +35,6 @@ spec:
           env:
             - name: SERAPH_OUT_DIR
               value: /usr/share/nginx/html/data
-            - name: SERAPH_BASE_URL
-              value: https://seraph.srectl.fabianoflorentino.dev/data/state.json
             - name: SERAPH_SYNC_INTERVAL
               value: "300"
           readinessProbe:
