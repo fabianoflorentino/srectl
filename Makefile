@@ -42,9 +42,7 @@ coverage:
 	$(GO) test -coverprofile=coverage.out ./...
 	$(GO) tool cover -func=coverage.out | tail -1
 	@total=$$($(GO) tool cover -func=coverage.out | tail -1 | awk '{print $$3}' | tr -d '%'); \
-	if [ $$total -lt $(COVERAGE_MIN) ]; then \
-		echo "coverage $$total% is below the $(COVERAGE_MIN)% minimum"; exit 1; \
-	fi; \
+	awk -v t="$$total" -v m="$(COVERAGE_MIN)" 'BEGIN { if (t+0 < m+0) { printf "coverage %.1f%% is below the %d%% minimum\n", t, m; exit 1 } }' || exit 1; \
 	echo "coverage $$total% >= $(COVERAGE_MIN)% OK"
 
 ## lint: Run golangci-lint

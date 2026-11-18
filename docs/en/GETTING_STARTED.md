@@ -41,7 +41,7 @@ the background and `--down` to stop it (`srectl open argocd --daemon` → `srect
 `srectl creds` prints the Argo CD and Grafana logins; Loki and Tempo run without
 authentication in this local stack.
 
-Commands for later phases (`demo`, `apps`, `trace`, `certs`, `logs`) exist as stubs
+Commands for later phases (`demo`, `apps`, `certs`, `logs`) exist as stubs
 and report "not implemented yet".
 
 ## Everyday flow
@@ -69,7 +69,7 @@ adds nicer UX (status table, port-forward, progress).
 | api-b | `srectl open api-b` |
 | fraudctl | `srectl open fraudctl` → `POST /fraud-score` |
 | certificate-validate dashboard | `https://certificate-validate.localhost` |
-| stracectl live view | `srectl trace api-a` |
+| stracectl live view | `srectl trace` (port-forward) |
 
 ## Logs (Loki)
 

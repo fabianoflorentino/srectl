@@ -218,17 +218,18 @@ Tasks:
 
 Tasks:
 
-- [ ] **fraudctl** (`deploy/projects/fraudctl/`): LB + 2 API replicas (mirrors its
-      `docker-compose` topology), `POST /fraud-score`, observed via logs (Loki),
-      pprof, and a Prometheus exporter sidecar for RED metrics.
+- [x] **fraudctl** (`deploy/projects/fraudctl/`): LB + 2 API workers in one Pod
+      (SCM_RIGHTS over a shared emptyDir), `POST /fraud-score` via ingress; throughput
+      /latency via ingress-nginx RED metrics, logs in Loki.
 - [x] **certificate-validate** (`deploy/projects/certificate-validate/`):
       `k8s monitor` DaemonSet scanning TLS Secrets/Ingresses; `--metrics-addr=:9102`;
       ServiceMonitor → Prometheus; webhook → Alertmanager/webhook-receiver; dashboard
       behind ingress with cert-manager TLS.
-- [ ] **stracectl** (`deploy/projects/stracectl/`): sidecar into api-a (or a dedicated
-      demo pod) with `attach --serve :8080`; syscall metrics → Prometheus; syscall
-      dashboard; `srectl trace` wraps `stracectl discover/attach`.
-- [ ] Alert rules: `certificate_days_left < 15`, syscall anomaly counters.
+- [x] **stracectl** (`deploy/projects/stracectl/`): dedicated demo pod + sidecar
+      (`attach --serve :8080`), syscall metrics → Prometheus, syscall dashboard;
+      `srectl trace` port-forwards the live view.
+- [x] Alert rules: `certificate_days_left < 15` (CertificateExpiringSoon/Expired);
+      syscall anomaly counters deferred.
 - [ ] `srectl demo projects` — an end-to-end script that touches all three.
 
 **Acceptance criteria:**
