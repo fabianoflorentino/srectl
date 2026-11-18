@@ -1,5 +1,7 @@
 ---
 title: "Aprenda SRE, DevOps e Platform Engineering num cluster real"
+hero_title: "Aprenda SRE, DevOps e Platform Engineering"
+accent: "num cluster real."
 description: "Uma plataforma local no kind — GitOps, observabilidade LGTM, segurança, apps demo e caos — ensinada com cenários práticos."
 ---
 

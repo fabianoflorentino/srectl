@@ -1,5 +1,7 @@
 ---
 title: "Learn SRE, DevOps and Platform Engineering on a real cluster"
+hero_title: "Learn SRE, DevOps and Platform Engineering"
+accent: "on a real cluster."
 description: "A local platform on kind — GitOps, LGTM observability, security, demo apps and chaos — taught through hands-on scenarios."
 ---
 

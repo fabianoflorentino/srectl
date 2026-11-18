@@ -1,11 +1,11 @@
 {{ define "main" }}
 <section class="hero">
-  <p class="eyebrow">{{ i18n "home_eyebrow" }}</p>
-  <h1>{{ .Title }}</h1>
+  <p class="kicker">{{ i18n "home_eyebrow" }}</p>
+  <h1>{{ .Params.hero_title | default .Title }}{{ with .Params.accent }} <em>{{ . }}</em>{{ end }}</h1>
   <div class="lead">{{ .Content }}</div>
   <div class="actions">
     {{ with .Site.GetPage "/tutorials" }}
-      <a class="btn" href="{{ .RelPermalink }}">{{ i18n "home_cta_tutorials" }} →</a>
+      <a class="btn" href="{{ .RelPermalink }}">{{ i18n "home_cta_tutorials" }} <span aria-hidden="true">→</span></a>
     {{ end }}
     <a class="btn ghost" href="{{ .Site.Params.github }}">GitHub</a>
   </div>
