@@ -27,7 +27,7 @@ data:
             "query": "label_values(namespace)",
             "includeAll": true,
             "multi": true,
-            "allValue": ".*",
+            "allValue": ".+",
             "current": { "selected": true, "text": "All", "value": "$__all" },
             "refresh": 2,
             "sort": 1
