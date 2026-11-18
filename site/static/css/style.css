@@ -30,15 +30,12 @@
 }
 
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; background: var(--bg); }
 
 body {
   margin: 0;
   min-height: 100vh;
-  background:
-    radial-gradient(900px 520px at 12% -12%, rgba(0, 229, 168, 0.07), transparent 60%),
-    radial-gradient(760px 460px at 92% 2%, rgba(56, 189, 248, 0.06), transparent 58%),
-    var(--bg);
+  background: transparent;
   color: var(--ink);
   font-family: var(--font-ui);
   font-size: 16px;
@@ -401,4 +398,58 @@ html { scroll-padding-top: 84px; }
   .nav a { transition: none !important; }
   .card:hover,
   .btn:hover { transform: none; }
+}
+
+/* ---------- Animated background: drifting glows + particle network ---------- */
+.bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+.bg::before,
+.bg::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.55;
+  z-index: 0;
+}
+.bg::before {
+  width: 55vmax;
+  height: 55vmax;
+  left: -15vmax;
+  top: -28vmax;
+  background: radial-gradient(circle, rgba(0, 229, 168, 0.18), transparent 70%);
+  animation: bg-drift-a 24s ease-in-out infinite;
+}
+.bg::after {
+  width: 46vmax;
+  height: 46vmax;
+  right: -18vmax;
+  top: -18vmax;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.16), transparent 70%);
+  animation: bg-drift-b 28s ease-in-out infinite;
+}
+.bg canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  display: block;
+}
+@keyframes bg-drift-a {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(4%, 6%, 0) scale(1.12); }
+}
+@keyframes bg-drift-b {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1.05); }
+  50% { transform: translate3d(-5%, 4%, 0) scale(0.95); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bg::before,
+  .bg::after { animation: none; }
 }
