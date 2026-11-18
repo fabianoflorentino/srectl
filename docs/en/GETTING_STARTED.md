@@ -118,6 +118,22 @@ fed by ingress-nginx (traffic/latency/errors) and node-exporter + kube-state-met
 
 Dashboard: **Grafana → Dashboards → `srectl · Security`**.
 
+## Demo apps (api-a / api-b)
+
+The demo workload produces the RED signals, distributed traces and logs:
+
+- `api-a` (orders) — `https://api-a.localhost` → `/health`, `/ready`, `/orders`, `/slow`, `/error`.
+  `/orders` calls `api-b` (payments) so the trace spans both services.
+- `api-b` (payments) — internal `POST /pay`, called by api-a.
+
+```bash
+srectl demo load --duration 30s --rps 20   # generate traffic (mix of /orders, /slow, /error)
+```
+
+- **Traces**: Grafana → Explore → Tempo (services `api-a` and `api-b`, one traceID).
+- **Metrics**: dashboard `srectl · App RED` (rate/errors/latency per service).
+- **Logs**: Loki `{namespace="demo", app="api-a"}` — each line carries `trace_id`.
+
 ## Demo scenarios
 
 ```text

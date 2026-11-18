@@ -118,6 +118,22 @@ kube-state-metrics (saturação):
 
 Dashboard: **Grafana → Dashboards → `srectl · Security`**.
 
+## Apps demo (api-a / api-b)
+
+O workload demo produz os sinais RED, traces distribuídos e logs:
+
+- `api-a` (pedidos) — `https://api-a.localhost` → `/health`, `/ready`, `/orders`, `/slow`, `/error`.
+  `/orders` chama a `api-b` (pagamentos), então o trace cobre os dois serviços.
+- `api-b` (pagamentos) — `POST /pay` interno, chamado pela api-a.
+
+```bash
+srectl demo load --duration 30s --rps 20   # gera tráfego (mix de /orders, /slow, /error)
+```
+
+- **Traces**: Grafana → Explore → Tempo (serviços `api-a` e `api-b`, mesmo traceID).
+- **Métricas**: dashboard `srectl · App RED` (taxa/erros/latência por serviço).
+- **Logs**: Loki `{namespace="demo", app="api-a"}` — cada linha carrega `trace_id`.
+
 ## Cenários de demo
 
 ```text

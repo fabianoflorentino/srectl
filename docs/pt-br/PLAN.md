@@ -202,13 +202,13 @@ Tarefas:
 
 Tarefas:
 
-- [ ] **api-a** (`apps/api-a/`): serviço de pedidos/checkout.
+- [x] **api-a** (`apps/api-a/`): serviço de pedidos/checkout.
       - `net/http` + roteamento Go 1.22; `/health`, `/ready`, `/orders`, `/slow`, `/error`.
-      - SDK OTel (traces → collector → Tempo), métricas Prometheus (RED), logs `slog`.
+      - SDK OTel (OTLP → Tempo), métricas Prometheus (RED), logs `slog`.
       - Chama a api-b (demonstra tracing distribuído).
-- [ ] **api-b** (`apps/api-b/`): serviço de pagamentos, mesma instrumentação, chamada pela api-a.
-- [ ] Dockerfiles + manifests em `deploy/apps/`.
-- [ ] Gerador de carga (`srectl demo load`) — k6 ou um pequeno hammer em Go — para gerar sinal.
+- [x] **api-b** (`apps/api-b/`): serviço de pagamentos, mesma instrumentação, chamada pela api-a.
+- [x] Dockerfiles + manifests em `deploy/apps/` (Deployment/Service/Ingress/ServiceMonitor).
+- [x] Gerador de carga (`srectl demo load`) — um pequeno hammer em Go — para gerar sinal.
 
 **Critérios de aceite:**
 

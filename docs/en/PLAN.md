@@ -196,13 +196,13 @@ Tasks:
 
 Tasks:
 
-- [ ] **api-a** (`apps/api-a/`): orders/checkout service.
+- [x] **api-a** (`apps/api-a/`): orders/checkout service.
       - `net/http` + Go 1.22 routing; `/health`, `/ready`, `/orders`, `/slow`, `/error`.
-      - OTel SDK (traces → collector → Tempo), Prometheus metrics (RED), `slog` structured logs.
+      - OTel SDK (OTLP → Tempo), Prometheus metrics (RED), `slog` structured logs.
       - Calls api-b (demonstrates distributed tracing).
-- [ ] **api-b** (`apps/api-b/`): payments service, same instrumentation, called by api-a.
-- [ ] Dockerfiles + `deploy/apps/` manifests.
-- [ ] Load generator (`srectl demo load`) — k6 or a small Go hammer — to produce signal.
+- [x] **api-b** (`apps/api-b/`): payments service, same instrumentation, called by api-a.
+- [x] Dockerfiles + `deploy/apps/` manifests (Deployment/Service/Ingress/ServiceMonitor).
+- [x] Load generator (`srectl demo load`) — a small Go hammer — to produce signal.
 
 **Acceptance criteria:**
 
