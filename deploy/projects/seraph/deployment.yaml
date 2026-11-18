@@ -8,6 +8,7 @@ metadata:
     app.kubernetes.io/name: seraph
 spec:
   replicas: 1
+  revisionHistoryLimit: 2
   selector:
     matchLabels:
       app: seraph
@@ -22,22 +23,27 @@ spec:
         runAsUser: 101
         runAsGroup: 101
         fsGroup: 101
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: seraph
-          image: srectl/seraph:dev
+          image: fabianoflorentino/seraph:v0.1.1
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
               containerPort: 8080
           env:
+            - name: SERAPH_OUT_DIR
+              value: /usr/share/nginx/html/data
             - name: SERAPH_SYNC_INTERVAL
               value: "300"
           readinessProbe:
             httpGet:
-              path: /healthz
+              path: /data/state.json
               port: http
-            initialDelaySeconds: 3
+            initialDelaySeconds: 5
             periodSeconds: 10
+            failureThreshold: 12
           livenessProbe:
             httpGet:
               path: /healthz
@@ -46,13 +52,28 @@ spec:
             periodSeconds: 20
           resources:
             requests:
-              cpu: 20m
+              cpu: 10m
               memory: 32Mi
             limits:
-              cpu: 200m
+              cpu: 250m
               memory: 128Mi
           securityContext:
             allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
             capabilities:
               drop:
                 - ALL
+          volumeMounts:
+            - name: data
+              mountPath: /usr/share/nginx/html/data
+            - name: cache
+              mountPath: /var/cache/nginx
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: data
+          emptyDir: {}
+        - name: cache
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}
