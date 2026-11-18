@@ -299,11 +299,14 @@ Tarefas:
 
 Tarefas:
 
-- [ ] GitHub Actions: lint, test, build da CLI + das duas APIs.
-- [ ] Build & publicação de imagens (api-a, api-b e mirrors dos três projetos).
-- [ ] Job E2E: `srectl up` num cluster kind de CI → `srectl demo verify` → `srectl down`.
-- [ ] Versionamento de imagens para pinar no Argo CD (sem `latest` no GitOps).
-- [ ] Finalizar docs: dashboards, runbooks, guia de contribuição (bilíngue).
+- [x] GitHub Actions: lint, race + cobertura nos testes, build da CLI + das duas APIs,
+      e um guard de GitOps contra `:latest`.
+- [x] Build & publicação de imagens: `images.yml` publica `srectl-api-a`/`srectl-api-b` no
+      GHCR pinadas por SHA/tag; os três projetos são publicados pela CI deles.
+- [x] Job E2E (`e2e.yml`, nightly/manual): `srectl up` no kind → `demo verify` → `down`.
+- [x] Versionamento de imagens pinado por tag/SHA; a CI falha com qualquer `:latest` em `deploy/`.
+- [x] Finalizar docs: dashboards, runbooks e guia de contribuição bilíngue
+      (`CONTRIBUTING.md` / `CONTRIBUTING.pt-br.md`).
 
 **Critérios de aceite:**
 

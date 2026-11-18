@@ -1,0 +1,58 @@
+name: e2e
+
+# Full-stack smoke test: kind cluster + srectl up + srectl demo verify + down.
+# Heavy (the whole LGTM + security + chaos stack), so it runs nightly/manually,
+# not on every PR.
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 6 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.27.x"
+
+      - name: Install kind, kubectl, helm
+        run: |
+          curl -fsSLo ./kind https://kind.sigs.k8s.io/dl/v0.32.0/kind-linux-amd64
+          chmod +x ./kind && sudo mv ./kind /usr/local/bin/kind
+          curl -fsSLo ./kubectl "https://dl.k8s.io/release/v1.36.1/bin/linux/amd64/kubectl"
+          chmod +x ./kubectl && sudo mv ./kubectl /usr/local/bin/kubectl
+          curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+
+      - name: Build CLI and demo images
+        run: |
+          make build
+          docker build -f apps/api-a/Dockerfile -t srectl/api-a:dev .
+          docker build -f apps/api-b/Dockerfile -t srectl/api-b:dev .
+
+      - name: srectl up
+        run: ./bin/srectl up
+
+      - name: Load demo images into kind
+        run: kind load docker-image srectl/api-a:dev srectl/api-b:dev --name srectl
+
+      - name: Wait for the platform then verify
+        run: |
+          ./bin/srectl sync || true
+          for i in $(seq 1 60); do
+            if ./bin/srectl demo verify; then
+              echo "platform healthy"; exit 0
+            fi
+            echo "waiting for apps to converge ($i/60)"; sleep 15
+          done
+          echo "::error::platform did not converge in time"; ./bin/srectl status; exit 1
+
+      - name: srectl down (always)
+        if: always()
+        run: ./bin/srectl down
