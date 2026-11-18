@@ -1,0 +1,18 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: cert-validate-monitor
+  namespace: projects
+  labels:
+    app.kubernetes.io/name: certificate-validate
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: certificate-validate
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 30s
+  namespaceSelector:
+    matchNames:
+      - projects
