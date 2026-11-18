@@ -246,13 +246,15 @@ Tasks:
 
 Tasks:
 
-- [ ] **chaos-mesh** install + CRDs (NetworkChaos, PodChaos, StressChaos, HTTPChaos).
-- [ ] `srectl demo chaos` scenarios: latency injection on api-a, pod kill on fraudctl,
-      DNS fault, packet loss.
-- [ ] SLO/SLI definitions in `docs/*/OBSERVABILITY.md` + Prometheus recording rules
-      (availability, latency objectives).
-- [ ] Runbooks (`docs/*/runbooks/`) for the top alerts.
-- [ ] `srectl demo verify` — asserts the stack recovers and alerts fire.
+- [x] **chaos-mesh** install + CRDs. PodChaos + StressChaos validated; NetworkChaos/
+      DNSChaos (iptables/ipset) do not work on kind's nested containers.
+- [ ] `srectl demo chaos` scenarios: latency (CPU stress on api-a) and pod-kill (fraudctl)
+      manifests are ready in `deploy/chaos/`; CLI `demo chaos` wiring pending. DNS/packet-loss
+      need NetworkChaos, unsupported on kind.
+- [x] SLO/SLI recording rules + `ApiAHighErrorRate` / `ApiAHighLatency` alerts
+      (`deploy/observability/slo-rules.yaml`).
+- [x] Runbooks (`docs/en/runbooks/`, `docs/pt-br/runbooks/`) for the top alerts.
+- [ ] `srectl demo verify` — asserts the stack recovers and alerts fire. (pending)
 
 **Acceptance criteria:**
 
