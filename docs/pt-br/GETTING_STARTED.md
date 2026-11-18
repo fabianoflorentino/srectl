@@ -98,6 +98,26 @@ kube-state-metrics (saturação):
 - **Latência** — `histogram_quantile(0.99, sum by (le) (rate(nginx_ingress_controller_request_duration_seconds_bucket[5m])))`
 - **Saturação** — % de CPU / memória / filesystem dos nós e top namespaces por CPU / memória
 
+## Segurança
+
+- **Kyverno** aplica políticas baseline (CEL `ValidatingPolicy`) no namespace `demo`:
+  sem tag `:latest`, requests/limits obrigatórios, sem `hostPath`, e `runAsNonRoot`
+  é reportado (Audit).
+  ```bash
+  kubectl run bad -n demo --image=nginx:latest   # rejeitado por disallow-latest-tag
+  ```
+- **Trivy Operator** escaneia os workloads de demo (vulnerabilidades, config audit e
+  RBAC): `kubectl get vulnerabilityreport,configauditreport -n demo`.
+- **Falco** detecta ameaças em runtime com probe modern eBPF e envia eventos ao Loki
+  (via Falcosidekick). Teste:
+  ```bash
+  kubectl exec -n demo deploy/hello -- cat /etc/shadow   # "Read sensitive file untrusted"
+  ```
+- **NetworkPolicies** aplicam default-deny no namespace `demo` e liberam só DNS,
+  ingress-nginx, probes do kubelet e tráfego intra-namespace (atuando via kindnet).
+
+Dashboard: **Grafana → Dashboards → `srectl · Security`**.
+
 ## Cenários de demo
 
 ```text

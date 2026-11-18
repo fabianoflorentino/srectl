@@ -173,13 +173,14 @@ Tasks:
 
 Tasks:
 
-- [ ] **Trivy Operator**: vulnerability scans + reports CRDs, CIS benchmarks.
-- [ ] **Falco**: runtime threat detection (ebpf), rule sets, output to Loki/Alertmanager.
-- [ ] **Kyverno**: baseline policies (require requests/limits, disallow latest tag,
-      require runAsNonRoot, block hostPath).
-- [ ] NetworkPolicies for the demo namespace (default-deny + allow matrix).
-- [ ] cert-manager (already in Phase 1) documented as the TLS pillar.
-- [ ] Dashboard: vulnerability + policy report view in Grafana (via metrics exporters).
+- [x] **Trivy Operator**: vulnerability/config-audit/RBAC reports (demo namespace),
+      ServiceMonitor metrics for Grafana.
+- [x] **Falco**: runtime detection with the modern eBPF probe; Falcosidekick → Loki.
+- [x] **Kyverno**: baseline policies as CEL ValidatingPolicy (disallow latest tag,
+      require requests/limits, require runAsNonRoot (Audit), block hostPath).
+- [x] NetworkPolicies for the demo namespace (default-deny + allow matrix, enforced by kindnet).
+- [x] cert-manager (from Phase 1) documented as the TLS pillar.
+- [x] Dashboard: vulnerability + policy view in Grafana (`srectl · Security`).
 
 **Acceptance criteria:**
 

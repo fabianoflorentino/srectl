@@ -98,6 +98,26 @@ fed by ingress-nginx (traffic/latency/errors) and node-exporter + kube-state-met
 - **Latency** — `histogram_quantile(0.99, sum by (le) (rate(nginx_ingress_controller_request_duration_seconds_bucket[5m])))`
 - **Saturation** — node CPU / memory / filesystem % and top namespaces by CPU / memory
 
+## Security
+
+- **Kyverno** enforces baseline policies (CEL `ValidatingPolicy`) in the `demo`
+  namespace: no `:latest` tags, requests/limits required, no `hostPath`, and
+  `runAsNonRoot` is reported (Audit).
+  ```bash
+  kubectl run bad -n demo --image=nginx:latest   # denied by disallow-latest-tag
+  ```
+- **Trivy Operator** scans demo workloads for image vulnerabilities, config audits
+  and RBAC issues: `kubectl get vulnerabilityreport,configauditreport -n demo`.
+- **Falco** detects runtime threats with the modern eBPF probe and ships events to
+  Loki (via Falcosidekick). Try it:
+  ```bash
+  kubectl exec -n demo deploy/hello -- cat /etc/shadow   # "Read sensitive file untrusted"
+  ```
+- **NetworkPolicies** default-deny the `demo` namespace and allow only DNS,
+  ingress-nginx, kubelet probes and intra-namespace traffic (enforced by kindnet).
+
+Dashboard: **Grafana → Dashboards → `srectl · Security`**.
+
 ## Demo scenarios
 
 ```text
