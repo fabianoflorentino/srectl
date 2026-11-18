@@ -24,6 +24,9 @@ type openTarget struct {
 // openTargets are the non-Argo CD services reachable via `srectl open`.
 var openTargets = map[string]openTarget{
 	"hello":        {namespace: "demo", resource: "svc/hello", port: 80, localPort: 8081, url: "http://localhost:8081"},
+	"api-a":        {namespace: "demo", resource: "svc/api-a", port: 80, localPort: 8082, url: "http://localhost:8082"},
+	"api-b":        {namespace: "demo", resource: "svc/api-b", port: 80, localPort: 8083, url: "http://localhost:8083"},
+	"fraudctl":     {namespace: "projects", resource: "svc/fraudctl", port: 80, localPort: 8084, url: "http://localhost:8084"},
 	"grafana":      {namespace: "monitoring", resource: "svc/kube-prometheus-stack-grafana", port: 80, localPort: 3000, url: "http://localhost:3000"},
 	"prometheus":   {namespace: "monitoring", resource: "svc/kube-prometheus-stack-prometheus", port: 9090, localPort: 9090, url: "http://localhost:9090"},
 	"alertmanager": {namespace: "monitoring", resource: "svc/kube-prometheus-stack-alertmanager", port: 9093, localPort: 9093, url: "http://localhost:9093"},
@@ -32,9 +35,9 @@ var openTargets = map[string]openTarget{
 func newOpenCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:       "open <service>",
-		Short:     "Port-forward a service (argocd, grafana, prometheus, alertmanager, hello)",
+		Short:     "Port-forward a service (argocd, grafana, prometheus, alertmanager, hello, api-a, api-b, fraudctl)",
 		Args:      cobra.ExactArgs(1),
-		ValidArgs: []string{"argocd", "grafana", "prometheus", "alertmanager", "hello"},
+		ValidArgs: []string{"argocd", "grafana", "prometheus", "alertmanager", "hello", "api-a", "api-b", "fraudctl"},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			service := args[0]
 

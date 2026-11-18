@@ -214,9 +214,8 @@ func TestStubCommands(t *testing.T) {
 		{"apps deploy", []string{"apps", "deploy"}, "not implemented yet (Phase 5)"},
 		{"apps restart", []string{"apps", "restart"}, "not implemented yet (Phase 5)"},
 		{"apps scale", []string{"apps", "scale"}, "not implemented yet (Phase 5)"},
-		{"trace", []string{"trace", "api-a"}, "not implemented yet (Phase 6)"},
 		{"certs", []string{"certs"}, "not implemented yet (Phase 6)"},
-		{"open api-a", []string{"open", "api-a"}, "not implemented yet (Phase 5)"},
+		{"open nope", []string{"open", "nope"}, "not implemented yet (Phase 5)"},
 		{"logs", []string{"logs", "api-a"}, "not implemented yet (Phase 5)"},
 	}
 
