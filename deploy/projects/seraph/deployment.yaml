@@ -27,8 +27,8 @@ spec:
           type: RuntimeDefault
       containers:
         - name: seraph
-          image: fabianoflorentino/seraph:edge
-          imagePullPolicy: Always
+          image: fabianoflorentino/seraph:v0.1.0
+          imagePullPolicy: IfNotPresent
           ports:
             - name: http
               containerPort: 8080
