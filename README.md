@@ -3,17 +3,17 @@
 A local, reproducible **SRE / DevOps / Platform Engineering** training environment on
 [kind](https://kind.sigs.k8s.io/), driven by a single Go CLI.
 
-> **Status: in progress.** Phases 0 (repository & CLI skeleton), 1 (cluster, ingress &
-> TLS), 2 (GitOps foundation, Argo CD) and 3 (observability LGTM core) are implemented —
-> the roadmap lives in [`docs/en/PLAN.md`](docs/en/PLAN.md).
+> **Status: implemented (phases 0–9).** Cluster, GitOps, LGTM observability, security,
+> demo apps, project integrations, SRE drills, the docs site and CI are all in place —
+> see [`docs/en/PLAN.md`](docs/en/PLAN.md).
 
 ## What it is
 
 One command (`srectl up`) brings up a complete platform on a local kind cluster:
 
 - **GitOps** — Argo CD (app-of-apps).
-- **Observability (LGTM)** — Prometheus + Grafana + Alertmanager, Loki (logs),
-  Tempo (traces), OpenTelemetry Collector, Alloy.
+- **Observability (LGTM)** — Prometheus + Grafana + Alertmanager, Loki + Alloy (logs),
+  Tempo (traces via OTLP), and metrics-server (cluster metrics / `kubectl top`).
 - **Security** — Trivy Operator, Falco, Kyverno, cert-manager, NetworkPolicies.
 - **Chaos** — chaos-mesh for SRE drills.
 - **Demo apps** — two instrumented Go APIs (api-a → api-b) for distributed tracing,
@@ -27,7 +27,7 @@ One command (`srectl up`) brings up a complete platform on a local kind cluster:
 The `srectl` CLI is a **simple task runner like Make** — it wraps `kind`/`kubectl`/`helm`
 and adds nicer UX.
 
-## Quick start (target)
+## Quick start
 
 ```bash
 make build && srectl up
@@ -55,7 +55,7 @@ srectl down
 
 ```text
 cmd/srectl/        CLI entrypoint
-internal/       cli, config, kind, k8s, argocd, demo, verify
+internal/       cli, config, kind, k8s, argocd, demo, chaos, verify, appobs
 apps/           demo APIs (api-a, api-b)
 deploy/         GitOps source of truth (Argo CD)
 site/           bilingual Hugo site (GitHub Pages)
@@ -75,17 +75,17 @@ To be determined (see LICENSE once added).
 Um ambiente de treinamento **SRE / DevOps / Platform Engineering** local e reprodutível
 em [kind](https://kind.sigs.k8s.io/), dirigido por uma única CLI em Go.
 
-> **Status: em andamento.** As Fases 0 (repositório & esqueleto da CLI), 1 (cluster,
-> ingress & TLS), 2 (fundação GitOps, Argo CD) e 3 (núcleo de observabilidade LGTM) estão
-> implementadas — o roteiro está em [`docs/pt-br/PLAN.md`](docs/pt-br/PLAN.md).
+> **Status: implementado (fases 0–9).** Cluster, GitOps, observabilidade LGTM, segurança,
+> apps demo, integração dos projetos, drills de SRE, site de docs e CI estão prontos —
+> veja [`docs/pt-br/PLAN.md`](docs/pt-br/PLAN.md).
 
 ## O que é
 
 Um comando (`srectl up`) sobe uma plataforma completa num cluster kind local:
 
 - **GitOps** — Argo CD (app-of-apps).
-- **Observabilidade (LGTM)** — Prometheus + Grafana + Alertmanager, Loki (logs),
-  Tempo (traces), OpenTelemetry Collector, Alloy.
+- **Observabilidade (LGTM)** — Prometheus + Grafana + Alertmanager, Loki + Alloy (logs),
+  Tempo (traces via OTLP) e metrics-server (métricas de cluster / `kubectl top`).
 - **Segurança** — Trivy Operator, Falco, Kyverno, cert-manager, NetworkPolicies.
 - **Caos** — chaos-mesh para drills de SRE.
 - **Apps demo** — duas APIs Go instrumentadas (api-a → api-b) para tracing distribuído,
@@ -99,7 +99,7 @@ Um comando (`srectl up`) sobe uma plataforma completa num cluster kind local:
 A CLI `srectl` é um **task runner simples como o Make** — envolve `kind`/`kubectl`/`helm`
 e adiciona uma UX melhor.
 
-## Começo rápido (alvo)
+## Começo rápido
 
 ```bash
 make build && srectl up
@@ -127,7 +127,7 @@ srectl down
 
 ```text
 cmd/srectl/        entrypoint da CLI
-internal/       cli, config, kind, k8s, argocd, demo, verify
+internal/       cli, config, kind, k8s, argocd, demo, chaos, verify, appobs
 apps/           APIs demo (api-a, api-b)
 deploy/         fonte de verdade GitOps (Argo CD)
 site/           site Hugo bilíngue (GitHub Pages)

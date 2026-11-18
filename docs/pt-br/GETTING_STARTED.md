@@ -1,8 +1,8 @@
 # Começando
 
-> **Status: em andamento.** As Fases 0–2 estão implementadas: o esqueleto da CLI,
-> o cluster kind com ingress/TLS e a fundação GitOps (app-of-apps do Argo CD). O
-> roteiro está em [`PLAN.md`](PLAN.md).
+> **Status: implementado (fases 0–9).** Tudo funciona de ponta a ponta: cluster, GitOps,
+> observabilidade (LGTM), segurança, apps demo, os três projetos integrados, drills de SRE
+> e o site de docs bilíngue. O roteiro está em [`PLAN.md`](PLAN.md).
 
 ## Pré-requisitos
 
@@ -41,8 +41,10 @@ em segundo plano e `--down` para parar (`srectl open argocd --daemon` → `srect
 `srectl creds` imprime os logins de Argo CD e Grafana; Loki e Tempo rodam sem
 autenticação nesta stack local.
 
-Comandos das fases seguintes (`demo`, `apps`, `certs`, `logs`) existem como
-stubs e reportam "not implemented yet".
+Implementados: `demo load`, `demo chaos`, `demo verify`, `trace` e `open` (argocd,
+grafana, prometheus, alertmanager, hello, api-a, api-b, fraudctl). Os demais cenários
+de `demo` (`break`, `error`, `security`, `certs`, `projects`), `apps`
+deploy/restart/scale e `certs`/`logs` ainda são stubs.
 
 ## Fluxo do dia a dia
 

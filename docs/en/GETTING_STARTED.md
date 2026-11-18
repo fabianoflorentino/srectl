@@ -1,8 +1,8 @@
 # Getting Started
 
-> **Status: in progress.** Phases 0–2 are implemented: the CLI skeleton, the kind
-> cluster with ingress/TLS, and the GitOps foundation (Argo CD app-of-apps). The
-> roadmap lives in [`PLAN.md`](PLAN.md).
+> **Status: implemented (phases 0–9).** Everything works end to end: cluster, GitOps,
+> observability (LGTM), security, demo apps, the three integrated projects, SRE drills
+> and the bilingual docs site. The roadmap lives in [`PLAN.md`](PLAN.md).
 
 ## Prerequisites
 
@@ -41,8 +41,10 @@ the background and `--down` to stop it (`srectl open argocd --daemon` → `srect
 `srectl creds` prints the Argo CD and Grafana logins; Loki and Tempo run without
 authentication in this local stack.
 
-Commands for later phases (`demo`, `apps`, `certs`, `logs`) exist as stubs
-and report "not implemented yet".
+Implemented: `demo load`, `demo chaos`, `demo verify`, `trace`, and `open` (argocd,
+grafana, prometheus, alertmanager, hello, api-a, api-b, fraudctl). The remaining
+`demo` scenarios (`break`, `error`, `security`, `certs`, `projects`), `apps`
+deploy/restart/scale, and `certs`/`logs` are still stubs.
 
 ## Everyday flow
 

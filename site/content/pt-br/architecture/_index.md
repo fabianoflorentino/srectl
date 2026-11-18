@@ -27,3 +27,25 @@ O ciclo de vida:
    `deploy/bootstrap/apps/` (ingress, cert-manager, observabilidade, segurança, apps, projetos, caos).
 3. Cada app filho renderiza charts Helm ou manifestos deste repositório.
 4. `srectl status` lê a visão do Argo CD — a mesma da UI.
+
+## Request & telemetry flow
+
+{{< mermaid >}}
+sequenceDiagram
+  participant U as User / srectl
+  participant N as ingress-nginx
+  participant A as api-a
+  participant B as api-b
+  participant T as Tempo
+  participant P as Prometheus
+  participant L as Loki
+  U->>N: GET /orders (TLS)
+  N->>A: route
+  A->>B: POST /pay (trace context)
+  B-->>A: 200 approved
+  A-->>U: 200 {order confirmed}
+  A-->>T: OTLP spans
+  B-->>T: OTLP spans
+  A-->>P: /metrics scrape
+  A-->>L: stdout logs via Alloy
+{{< /mermaid >}}

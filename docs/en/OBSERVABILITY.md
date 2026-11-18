@@ -9,7 +9,7 @@ actionable SLOs and alerts.
 | --- | --- | --- | --- |
 | Metrics | app `/metrics` → Prometheus (scrape via ServiceMonitor) | Prometheus | PromQL |
 | Logs | app `slog` stdout → Alloy → Loki | Loki | LogQL |
-| Traces | OTel SDK → OTel Collector → Tempo | Tempo | TraceQL |
+| Traces | OTel SDK (OTLP) → Tempo | Tempo | TraceQL |
 
 Grafana is provisioned with all three datasources so a single query can pivot across
 signals (trace → logs → metrics).

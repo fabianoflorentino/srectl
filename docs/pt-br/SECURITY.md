@@ -52,7 +52,7 @@ O namespace `apps` é **deny-by-default**:
 
 - api-a → api-b (porta 8080) permitido.
 - ingress → api-a, api-b permitido.
-- api-a → OTel collector, api-b → OTel collector permitido.
+- api-a/api-b → Tempo (OTLP :4318) permitido.
 - todo o resto bloqueado (incluindo fraudctl ↔ apps, salvo necessidade explícita).
 
 ## TLS (cert-manager + certificate-validate)

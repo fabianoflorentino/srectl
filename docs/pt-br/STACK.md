@@ -27,7 +27,7 @@ Legenda — método de instalação:
 | Loki | Agregação de logs | GitOps (Helm) | Nativo do Grafana, simples |
 | Alloy | Agente de logs + pipeline OTel | GitOps (DaemonSet) | Um agente, substitui Promtail/collector-side |
 | Tempo | Backend de tracing distribuído | GitOps (Helm) | Traces nativos do Grafana |
-| OpenTelemetry Collector | Ingestão/roteamento de traces | GitOps (Deployment) | Pipeline padrão |
+| SDK OpenTelemetry (nas apps) | Traces de api-a/api-b via OTLP | embutido nas apps | sem serviço extra |
 | Grafana | Dashboards + UI unificada | GitOps (Helm) | Painel único |
 
 ## Segurança

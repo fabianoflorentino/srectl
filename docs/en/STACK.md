@@ -27,7 +27,7 @@ Legend — install method:
 | Loki | Log aggregation | GitOps (Helm) | Grafana-native, simple |
 | Alloy | Log tailing + OTel pipeline agent | GitOps (DaemonSet) | One agent, replaces Promtail/collector-side |
 | Tempo | Distributed tracing backend | GitOps (Helm) | Grafana-native traces |
-| OpenTelemetry Collector | Trace ingestion/routing | GitOps (Deployment) | Standard pipeline |
+| OpenTelemetry SDK (in-app) | Traces from api-a/api-b via OTLP | built into the apps | no extra service |
 | Grafana | Dashboards + unified UI | GitOps (Helm) | Single pane of glass |
 
 ## Security

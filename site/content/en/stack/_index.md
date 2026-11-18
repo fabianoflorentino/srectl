@@ -10,7 +10,7 @@ description: "Every component, why it exists, and how it is installed."
 | Ingress / TLS | ingress-nginx, cert-manager | HTTP(S) entrypoint, automatic certificates |
 | Metrics | Prometheus, Alertmanager, Grafana | Golden signals, RED, alerting |
 | Logs | Loki + Alloy | Pod logs with `namespace/pod/app/level` labels |
-| Traces | Tempo + OpenTelemetry | Distributed traces across api-a → api-b |
+| Traces | Tempo (OTLP receivers) | Distributed traces across api-a → api-b |
 | Cluster metrics | metrics-server, node-exporter, kube-state-metrics | `kubectl top`, saturation, object state |
 | Security | Kyverno, Trivy Operator, Falco | Policy, vulnerability + config scans, runtime detection |
 | Chaos | chaos-mesh | Pod kill and CPU stress drills |

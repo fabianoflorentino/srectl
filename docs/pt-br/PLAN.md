@@ -54,7 +54,7 @@ Pense nele como `make up`, `make status`, `make demo`, … mas descobrível via
 | TLS | cert-manager + ClusterIssuer selfsigned | Certificados automatizados, alimenta certificate-validate |
 | Métricas | kube-prometheus-stack (Prometheus + Grafana + Alertmanager) | Padrão de facto |
 | Logs | Loki + Alloy | Um único agente para logs + pipeline OTel |
-| Tracing | Tempo + OpenTelemetry Collector | Backend de tracing padrão |
+| Tracing | Tempo (receptores OTLP) | Backend de tracing padrão |
 | Segurança | Trivy (Operator) + Falco + Kyverno | Scan, runtime, política |
 | Caos | chaos-mesh | Injeção de latência/falha para drills de SRE |
 | Site | Hugo, bilíngue EN/PT-BR, GitHub Pages | Mesmo tooling dos nossos outros projetos |
@@ -157,7 +157,7 @@ Tarefas:
       kube-state-metrics, CRDs do Prometheus Operator (ServiceMonitor/PodMonitor).
 - [x] **Loki** (single-binary) + **Alloy** DaemonSet (tail dos logs de pods, labels
       namespace/pod/container/app/node, `level` extraído).
-- [x] **Tempo** (single-binary) — **OpenTelemetry Collector** entra com as apps demo.
+- [x] **Tempo** (single-binary) — as apps exportam OTLP direto pro Tempo (sem collector separado).
 - [x] Datasources do Grafana (Prometheus, Loki, Tempo) provisionados via ConfigMap.
 - [ ] Dashboards baseline: visão do cluster, node/pod, RED das apps, syscall (stracectl),
       certificados (certificate-validate). (existem os dashboards `srectl · Logs` e `srectl · Golden Signals`)

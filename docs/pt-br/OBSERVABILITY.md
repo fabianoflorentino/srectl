@@ -9,7 +9,7 @@ alertas acionáveis.
 | --- | --- | --- | --- |
 | Métricas | app `/metrics` → Prometheus (scrape via ServiceMonitor) | Prometheus | PromQL |
 | Logs | app `slog` stdout → Alloy → Loki | Loki | LogQL |
-| Traces | SDK OTel → OTel Collector → Tempo | Tempo | TraceQL |
+| Traces | SDK OTel (OTLP) → Tempo | Tempo | TraceQL |
 
 O Grafana é provisionado com os três datasources para que uma única consulta possa
 navegar entre sinais (trace → logs → métricas).

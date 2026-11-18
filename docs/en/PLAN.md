@@ -49,7 +49,7 @@ Think of it as `make up`, `make status`, `make demo`, … but discoverable via
 | TLS | cert-manager + selfsigned ClusterIssuer | Automated certs, feeds certificate-validate |
 | Metrics | kube-prometheus-stack (Prometheus + Grafana + Alertmanager) | De-facto standard |
 | Logs | Loki + Alloy | Single agent for logs + OTel pipelines |
-| Traces | Tempo + OpenTelemetry Collector | Standard tracing backend |
+| Traces | Tempo (OTLP receivers) | Standard tracing backend |
 | Security | Trivy (Operator) + Falco + Kyverno | Scan, runtime, policy |
 | Chaos | chaos-mesh | Latency/failure injection for SRE drills |
 | Site | Hugo, bilingual EN/PT-BR, GitHub Pages | Same tooling as our other projects |
@@ -151,7 +151,7 @@ Tasks:
       kube-state-metrics, Prometheus Operator CRDs (ServiceMonitor/PodMonitor).
 - [x] **Loki** (single-binary) + **Alloy** DaemonSet (pod-log tailing, labels for
       namespace/pod/container/app/node, extracted `level`).
-- [x] **Tempo** (single-binary) — **OpenTelemetry Collector** lands with the demo apps.
+- [x] **Tempo** (single-binary) — apps export OTLP directly to Tempo (no separate collector).
 - [x] Grafana datasources (Prometheus, Loki, Tempo) provisioned via ConfigMap.
 - [ ] Baseline dashboards: cluster overview, node/pod, app RED, syscall (stracectl),
       certificates (certificate-validate). (`srectl · Logs` and `srectl · Golden Signals` dashboards exist)

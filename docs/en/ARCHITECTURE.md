@@ -31,7 +31,6 @@ flowchart TB
             LOKI["Loki"]
             ALLOY["Alloy"]
             TEMPO["Tempo"]
-            OTEL["OTel Collector"]
         end
 
         subgraph Sec["Security"]
@@ -57,9 +56,8 @@ flowchart TB
     NGINX --> APIA & APIB & CV & GRAF
     CERT --> NGINX
     APIA -->|"tcp"| APIB
-    APIA --> OTEL
-    APIB --> OTEL
-    OTEL --> TEMPO
+    APIA -->|"OTLP :4318"| TEMPO
+    APIB -->|"OTLP :4318"| TEMPO
     ALLOY --> LOKI
     FALCO --> LOKI & AM
     PROM --> AM & GRAF
@@ -138,7 +136,6 @@ sequenceDiagram
     participant NGX as ingress-nginx
     participant A as api-a
     participant B as api-b
-    participant O as OTel Collector
     participant T as Tempo
 
     U->>NGX: GET /orders
@@ -146,16 +143,15 @@ sequenceDiagram
     A->>B: POST /payments/charge
     B-->>A: 200
     A-->>U: 200
-    A-->>O: span (api-a)
-    B-->>O: span (api-b)
-    O-->>T: batch spans
+    A-->>T: span (api-a, OTLP)
+    B-->>T: span (api-b, OTLP)
 ```
 
 Both APIs emit:
 
 - **Metrics** → Prometheus (via `/metrics` + ServiceMonitor).
 - **Logs** → Alloy → Loki (stdout, `slog` JSON).
-- **Traces** → OTel Collector → Tempo.
+- **Traces** → Tempo (OTLP :4318, exported directly by the apps).
 
 ## Observability data flow
 
