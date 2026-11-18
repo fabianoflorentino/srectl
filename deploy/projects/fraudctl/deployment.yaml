@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fraudctl
+  namespace: projects
+  labels:
+    app: fraudctl
+    app.kubernetes.io/name: fraudctl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fraudctl
+  template:
+    metadata:
+      labels:
+        app: fraudctl
+        app.kubernetes.io/name: fraudctl
+    spec:
+      containers:
+        - name: lb
+          image: srectl/fraudctl-lb:dev
+          imagePullPolicy: IfNotPresent
+          args:
+            - -workers
+            - /sockets/lb-ctrl-1.sock,/sockets/lb-ctrl-2.sock
+          ports:
+            - name: http
+              containerPort: 9999
+          readinessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 2
+            periodSeconds: 5
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              cpu: 100m
+              memory: 32Mi
+          volumeMounts:
+            - name: sockets
+              mountPath: /sockets
+        - name: api-1
+          image: srectl/fraudctl:dev
+          imagePullPolicy: IfNotPresent
+          args:
+            - -pprof
+            - ":6060"
+          env:
+            - name: CTRL_SOCKET
+              value: /sockets/lb-ctrl-1.sock
+            - name: TELEMETRY_ENABLED
+              value: "true"
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 500m
+              memory: 192Mi
+          volumeMounts:
+            - name: sockets
+              mountPath: /sockets
+        - name: api-2
+          image: srectl/fraudctl:dev
+          imagePullPolicy: IfNotPresent
+          args:
+            - -pprof
+            - ":6061"
+          env:
+            - name: CTRL_SOCKET
+              value: /sockets/lb-ctrl-2.sock
+            - name: TELEMETRY_ENABLED
+              value: "true"
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 500m
+              memory: 192Mi
+          volumeMounts:
+            - name: sockets
+              mountPath: /sockets
+      volumes:
+        - name: sockets
+          emptyDir:
+            medium: Memory
