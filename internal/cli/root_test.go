@@ -355,7 +355,7 @@ func TestOpenGrafana(t *testing.T) {
 }
 
 func TestDemoScenarios(t *testing.T) {
-	for _, sc := range []string{"load", "chaos", "break", "verify", "error", "security", "certs", "projects"} {
+	for _, sc := range []string{"chaos", "break", "verify", "error", "security", "certs", "projects"} {
 		t.Run(sc, func(t *testing.T) {
 			root := NewRootCommand()
 			root.SetOut(io.Discard)

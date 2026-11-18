@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: api-a
+  namespace: demo
+  annotations:
+    cert-manager.io/issuer: srectl-ca
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - api-a.localhost
+      secretName: api-a-tls
+  rules:
+    - host: api-a.localhost
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: api-a
+                port:
+                  number: 80

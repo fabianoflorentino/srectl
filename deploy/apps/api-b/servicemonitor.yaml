@@ -1,0 +1,15 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: api-b
+  namespace: demo
+  labels:
+    app: api-b
+spec:
+  selector:
+    matchLabels:
+      app: api-b
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s
