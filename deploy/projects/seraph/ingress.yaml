@@ -1,0 +1,30 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: seraph
+  namespace: projects
+  labels:
+    app: seraph
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: seraph.localhost
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: seraph
+                port:
+                  number: 80
+    - host: seraph.srectl.fabianoflorentino.dev
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: seraph
+                port:
+                  number: 80

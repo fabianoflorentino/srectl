@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: seraph
+  namespace: projects
+  labels:
+    app: seraph
+    app.kubernetes.io/name: seraph
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: seraph
+  template:
+    metadata:
+      labels:
+        app: seraph
+        app.kubernetes.io/name: seraph
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 101
+        runAsGroup: 101
+        fsGroup: 101
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: seraph
+          image: fabianoflorentino/seraph:edge
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: SERAPH_OUT_DIR
+              value: /usr/share/nginx/html/data
+            - name: SERAPH_BASE_URL
+              value: https://seraph.srectl.fabianoflorentino.dev/data/state.json
+            - name: SERAPH_SYNC_INTERVAL
+              value: "300"
+          readinessProbe:
+            httpGet:
+              path: /data/state.json
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            failureThreshold: 12
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 250m
+              memory: 128Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - name: data
+              mountPath: /usr/share/nginx/html/data
+            - name: cache
+              mountPath: /var/cache/nginx
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: data
+          emptyDir: {}
+        - name: cache
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}

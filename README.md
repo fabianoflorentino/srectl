@@ -19,9 +19,10 @@ One command (`srectl up`) brings up a complete platform on a local kind cluster:
 - **Demo apps** — two instrumented Go APIs (api-a → api-b) for distributed tracing,
   RED metrics and structured logs.
 - **Our projects, integrated** — [`fraudctl`](https://github.com/fabianoflorentino/fraudctl),
-  [`stracectl`](https://github.com/fabianoflorentino/stracectl) and
+  [`stracectl`](https://github.com/fabianoflorentino/stracectl),
   [`certificate-validate`](https://github.com/fabianoflorentino/certificate-validate)
-  running as first-class workloads.
+  and [`seraph`](https://github.com/fabianoflorentino/seraph) running as
+  first-class workloads.
 - **Study site** — a bilingual (EN/PT-BR) Hugo site on GitHub Pages.
 
 The `srectl` CLI is a **simple task runner like Make** — it wraps `kind`/`kubectl`/`helm`
@@ -91,9 +92,10 @@ Um comando (`srectl up`) sobe uma plataforma completa num cluster kind local:
 - **Apps demo** — duas APIs Go instrumentadas (api-a → api-b) para tracing distribuído,
   métricas RED e logs estruturados.
 - **Nossos projetos, integrados** — [`fraudctl`](https://github.com/fabianoflorentino/fraudctl),
-  [`stracectl`](https://github.com/fabianoflorentino/stracectl) e
+  [`stracectl`](https://github.com/fabianoflorentino/stracectl),
   [`certificate-validate`](https://github.com/fabianoflorentino/certificate-validate)
-  rodando como workloads de primeira classe.
+  e [`seraph`](https://github.com/fabianoflorentino/seraph) rodando como
+  workloads de primeira classe.
 - **Site de estudo** — um site Hugo bilíngue (EN/PT-BR) no GitHub Pages.
 
 A CLI `srectl` é um **task runner simples como o Make** — envolve `kind`/`kubectl`/`helm`
