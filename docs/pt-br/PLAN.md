@@ -227,7 +227,7 @@ Tarefas:
 - [ ] **fraudctl** (`deploy/projects/fraudctl/`): LB + 2 réplicas de API (espelha a
       topologia do `docker-compose`), `POST /fraud-score`, observado via logs (Loki),
       pprof e um sidecar exporter Prometheus para métricas RED.
-- [ ] **certificate-validate** (`deploy/projects/certificate-validate/`):
+- [x] **certificate-validate** (`deploy/projects/certificate-validate/`):
       DaemonSet `k8s monitor` varrendo Secrets/Ingresses TLS; `--metrics-addr=:9102`;
       ServiceMonitor → Prometheus; webhook → Alertmanager/webhook-receiver; dashboard
       atrás do ingress com TLS do cert-manager.
