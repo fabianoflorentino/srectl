@@ -1,0 +1,14 @@
+apiVersion: chaos-mesh.org/v1alpha1
+kind: PodChaos
+metadata:
+  name: fraudctl-pod-kill
+  namespace: projects
+spec:
+  action: pod-kill
+  mode: one
+  selector:
+    namespaces:
+      - projects
+    labelSelectors:
+      app: fraudctl
+  gracePeriod: 0

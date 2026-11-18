@@ -1,0 +1,46 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: srectl-slo-rules
+  namespace: monitoring
+  labels:
+    release: kube-prometheus-stack
+spec:
+  groups:
+    - name: srectl-slo-recording
+      interval: 30s
+      rules:
+        - record: slo:api_a_availability:ratio5m
+          expr: |
+            sum(rate(api_a_http_requests_total{route="GET /orders",status!~"5.."}[5m]))
+            / clamp_min(sum(rate(api_a_http_requests_total{route="GET /orders"}[5m])), 1e-9)
+        - record: slo:api_a_latency_p95:5m
+          expr: |
+            histogram_quantile(0.95,
+              sum by (le) (rate(api_a_http_request_duration_seconds_bucket{route="GET /orders"}[5m])))
+        - record: slo:fraudctl_availability:ratio5m
+          expr: |
+            sum(rate(nginx_ingress_controller_requests{ingress="fraudctl",status!~"5.."}[5m]))
+            / clamp_min(sum(rate(nginx_ingress_controller_requests{ingress="fraudctl"}[5m])), 1e-9)
+        - record: slo:fraudctl_latency_p95:5m
+          expr: |
+            histogram_quantile(0.95,
+              sum by (le) (rate(nginx_ingress_controller_request_duration_seconds_bucket{ingress="fraudctl"}[5m])))
+    - name: srectl-slo-alerts
+      rules:
+        - alert: ApiAHighErrorRate
+          expr: slo:api_a_availability:ratio5m < 0.95
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            summary: "api-a /orders error rate is high (availability {{ $value | humanizePercentage }})"
+            description: "api-a availability over 5m dropped below 95%. Check api-b and the runner logs (Loki) and traces (Tempo)."
+        - alert: ApiAHighLatency
+          expr: slo:api_a_latency_p95:5m > 0.02
+          for: 30s
+          labels:
+            severity: warning
+          annotations:
+            summary: "api-a /orders p95 latency is {{ $value | humanizeDuration }}"
+            description: "api-a /orders p95 exceeded 20ms. Likely CPU saturation or an upstream (api-b) slowdown."

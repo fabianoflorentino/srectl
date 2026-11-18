@@ -1,0 +1,26 @@
+apiVersion: chaos-mesh.org/v1alpha1
+kind: NetworkChaos
+metadata:
+  name: api-a-latency
+  namespace: demo
+spec:
+  action: delay
+  mode: all
+  selector:
+    namespaces:
+      - demo
+    labelSelectors:
+      app: api-a
+  delay:
+    latency: "300ms"
+    correlation: "100"
+    jitter: "0ms"
+  direction: to
+  target:
+    mode: all
+    selector:
+      namespaces:
+        - demo
+      labelSelectors:
+        app: api-b
+  duration: "75s"
