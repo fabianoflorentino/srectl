@@ -275,15 +275,15 @@ deste projeto.
 
 Tarefas:
 
-- [ ] Projeto Hugo em `site/`, bilíngue (**EN** padrão + **PT-BR** em `/pt-br/`),
-      igual aos nossos outros projetos.
-- [ ] Seções de conteúdo: visão geral, arquitetura, a stack e trilhas de aprendizado por
+- [x] Projeto Hugo em `site/`, bilíngue (**EN** padrão + **PT-BR** em `/pt-br/`),
+      layouts próprios (sem tema), igual aos nossos outros projetos.
+- [x] Seções de conteúdo: visão geral, arquitetura, a stack e trilhas de aprendizado por
       tema (**SRE**, **DevOps**, **Platform Engineering**).
-- [ ] Tutoriais práticos dirigidos pelos cenários de `srectl demo` (observabilidade,
+- [x] Tutoriais práticos dirigidos pelos cenários de `srectl demo` (observabilidade,
       segurança, caos).
-- [ ] Runbooks + páginas de SLO gerados a partir dos docs.
-- [ ] Diagramas (Mermaid) renderizados no site.
-- [ ] Deploy no GitHub Pages via GitHub Actions (`site/` → Pages).
+- [x] Runbooks + páginas de SLO (resumos no site; runbooks completos em `docs/*/runbooks/`).
+- [x] Diagramas (Mermaid) renderizados no site (página de arquitetura).
+- [x] Deploy no GitHub Pages via GitHub Actions (`.github/workflows/site.yaml`).
 
 **Critérios de aceite:**
 

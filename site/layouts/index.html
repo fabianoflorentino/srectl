@@ -1,0 +1,34 @@
+{{ define "main" }}
+<section class="hero">
+  <p class="eyebrow">{{ i18n "home_eyebrow" }}</p>
+  <h1>{{ .Title }}</h1>
+  <div class="lead">{{ .Content }}</div>
+  <div class="actions">
+    {{ with .Site.GetPage "/tutorials" }}
+      <a class="btn" href="{{ .RelPermalink }}">{{ i18n "home_cta_tutorials" }} →</a>
+    {{ end }}
+    <a class="btn ghost" href="{{ .Site.Params.github }}">GitHub</a>
+  </div>
+</section>
+
+<section class="grid">
+  {{ with .Site.GetPage "/sre" }}
+  <a class="card" href="{{ .RelPermalink }}">
+    <h2>{{ i18n "path_sre_title" }}</h2>
+    <p>{{ i18n "path_sre_desc" }}</p>
+  </a>
+  {{ end }}
+  {{ with .Site.GetPage "/devops" }}
+  <a class="card" href="{{ .RelPermalink }}">
+    <h2>{{ i18n "path_devops_title" }}</h2>
+    <p>{{ i18n "path_devops_desc" }}</p>
+  </a>
+  {{ end }}
+  {{ with .Site.GetPage "/platform" }}
+  <a class="card" href="{{ .RelPermalink }}">
+    <h2>{{ i18n "path_platform_title" }}</h2>
+    <p>{{ i18n "path_platform_desc" }}</p>
+  </a>
+  {{ end }}
+</section>
+{{ end }}

@@ -1,0 +1,104 @@
+baseURL = "https://fabianoflorentino.github.io/srectl/"
+defaultContentLanguage = "en"
+defaultContentLanguageInSubdir = false
+title = "srectl"
+enableRobotsTXT = true
+
+[pagination]
+  pagerSize = 50
+
+[languages]
+  [languages.en]
+    locale = "en-us"
+    label = "EN"
+    weight = 1
+    title = "srectl"
+    contentDir = "content/en"
+    [languages.en.params]
+      description = "A local SRE / DevOps / Platform Engineering training environment on kind, driven by GitOps."
+    [languages.en.menu]
+      [[languages.en.menu.main]]
+        name = "Overview"
+        pageRef = "/"
+        weight = 1
+      [[languages.en.menu.main]]
+        name = "Architecture"
+        pageRef = "/architecture"
+        weight = 2
+      [[languages.en.menu.main]]
+        name = "Stack"
+        pageRef = "/stack"
+        weight = 3
+      [[languages.en.menu.main]]
+        name = "SRE"
+        pageRef = "/sre"
+        weight = 4
+      [[languages.en.menu.main]]
+        name = "DevOps"
+        pageRef = "/devops"
+        weight = 5
+      [[languages.en.menu.main]]
+        name = "Platform"
+        pageRef = "/platform"
+        weight = 6
+      [[languages.en.menu.main]]
+        name = "Tutorials"
+        pageRef = "/tutorials"
+        weight = 7
+      [[languages.en.menu.main]]
+        name = "Runbooks"
+        pageRef = "/runbooks"
+        weight = 8
+
+  [languages.pt-br]
+    locale = "pt-BR"
+    label = "PT-BR"
+    weight = 2
+    title = "srectl"
+    contentDir = "content/pt-br"
+    [languages.pt-br.params]
+      description = "Um ambiente local de treino em SRE / DevOps / Platform Engineering no kind, dirigido por GitOps."
+    [languages.pt-br.menu]
+      [[languages.pt-br.menu.main]]
+        name = "Visão geral"
+        pageRef = "/"
+        weight = 1
+      [[languages.pt-br.menu.main]]
+        name = "Arquitetura"
+        pageRef = "/architecture"
+        weight = 2
+      [[languages.pt-br.menu.main]]
+        name = "Stack"
+        pageRef = "/stack"
+        weight = 3
+      [[languages.pt-br.menu.main]]
+        name = "SRE"
+        pageRef = "/sre"
+        weight = 4
+      [[languages.pt-br.menu.main]]
+        name = "DevOps"
+        pageRef = "/devops"
+        weight = 5
+      [[languages.pt-br.menu.main]]
+        name = "Plataforma"
+        pageRef = "/platform"
+        weight = 6
+      [[languages.pt-br.menu.main]]
+        name = "Tutoriais"
+        pageRef = "/tutorials"
+        weight = 7
+      [[languages.pt-br.menu.main]]
+        name = "Runbooks"
+        pageRef = "/runbooks"
+        weight = 8
+
+[params]
+  github = "https://github.com/fabianoflorentino/srectl"
+  author = "Fabiano Florentino"
+
+[markup]
+  [markup.highlight]
+    style = "github-dark"
+    noClasses = false
+  [markup.goldmark.renderer]
+    unsafe = true

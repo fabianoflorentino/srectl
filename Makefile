@@ -10,7 +10,7 @@ LDFLAGS=-ldflags "-X github.com/fabianoflorentino/srectl/internal/version.Versio
 	-X github.com/fabianoflorentino/srectl/internal/version.Commit=$(COMMIT) \
 	-X github.com/fabianoflorentino/srectl/internal/version.Date=$(BUILD_DATE)"
 
-.PHONY: all build clean test test-short lint lint-fix fmt docker-build install help
+.PHONY: all build clean test test-short lint lint-fix fmt docker-build install site-dev site-build help
 
 .DEFAULT_GOAL := help
 
@@ -65,6 +65,14 @@ docker-build:
 ## install: Install srectl to GOBIN
 install:
 	$(GO) install $(LDFLAGS) ./cmd/srectl
+
+## site-dev: Serve the Hugo documentation site locally
+site-dev:
+	hugo server --source site --bind 0.0.0.0
+
+## site-build: Build the static documentation site
+site-build:
+	hugo --source site --minify
 
 ## help: Show this help message
 help:

@@ -1,0 +1,8 @@
+home_eyebrow = "SRE · DevOps · Platform Engineering"
+home_cta_tutorials = "Tutoriais práticos"
+path_sre_title = "SRE"
+path_sre_desc = "SLOs e error budget, alertas, drills de caos e resposta a incidentes num cluster real."
+path_devops_title = "DevOps"
+path_devops_desc = "GitOps com Argo CD, pipelines de imagem e CI — build, deploy e rollback."
+path_platform_title = "Plataforma"
+path_platform_desc = "Self-service, política como código (Kyverno) e observabilidade como plataforma."

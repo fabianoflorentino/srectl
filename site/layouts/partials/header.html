@@ -1,0 +1,21 @@
+<header class="site-header">
+  <div class="header-inner">
+    <a class="brand" href="{{ .Site.Home.RelPermalink }}">
+      <span class="brand-mark">◆</span> {{ .Site.Title }}
+    </a>
+    <nav class="nav" aria-label="Main">
+      {{ range .Site.Menus.main }}
+        <a href="{{ .URL }}"{{ if eq $.RelPermalink .URL }} aria-current="page"{{ end }}>{{ .Name }}</a>
+      {{ end }}
+    </nav>
+    <div class="lang">
+      {{ range hugo.Sites }}
+        {{ if eq .Language.Lang $.Site.Language.Lang }}
+          <span class="active">{{ .Language.Label }}</span>
+        {{ else }}
+          <a href="{{ .Home.RelPermalink }}">{{ .Language.Label }}</a>
+        {{ end }}
+      {{ end }}
+    </div>
+  </div>
+</header>

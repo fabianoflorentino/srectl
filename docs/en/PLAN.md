@@ -269,14 +269,14 @@ through this project.
 
 Tasks:
 
-- [ ] Hugo project in `site/`, bilingual (**EN** default + **PT-BR** at `/pt-br/`),
-      matching our other projects.
-- [ ] Content sections: overview, architecture, the stack, and per-theme learning paths
+- [x] Hugo project in `site/`, bilingual (**EN** default + **PT-BR** at `/pt-br/`),
+      custom layouts (no theme), matching our other projects.
+- [x] Content sections: overview, architecture, the stack, and per-theme learning paths
       (**SRE**, **DevOps**, **Platform Engineering**).
-- [ ] Hands-on tutorials driven by `srectl demo` scenarios (observability, security, chaos).
-- [ ] Runbooks + SLO pages generated from the docs.
-- [ ] Diagrams (Mermaid) rendered in the site.
-- [ ] GitHub Pages deploy via GitHub Actions (`site/` → Pages).
+- [x] Hands-on tutorials driven by `srectl demo` scenarios (observability, security, chaos).
+- [x] Runbooks + SLO pages (site summaries; full runbooks live in `docs/*/runbooks/`).
+- [x] Diagrams (Mermaid) rendered in the site (architecture page).
+- [x] GitHub Pages deploy via GitHub Actions (`.github/workflows/site.yaml`).
 
 **Acceptance criteria:**
 
