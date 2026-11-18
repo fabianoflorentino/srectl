@@ -4,6 +4,17 @@
     <p><a href="{{ .Site.Params.github }}">github.com/fabianoflorentino/srectl</a> · © {{ now.Year }} {{ .Site.Params.author }}</p>
   </div>
 </footer>
+<script>
+  (function () {
+    var header = document.querySelector(".site-header");
+    if (!header) return;
+    var onScroll = function () {
+      header.classList.toggle("is-stuck", window.scrollY > 8);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+  })();
+</script>
 <script type="module">
   import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
   mermaid.initialize({ startOnLoad: true, theme: 'dark', securityLevel: 'loose' });
