@@ -328,7 +328,7 @@ Tasks:
 - [x] `srectl slo compute` (one-off Job) and `srectl slo status` (burn-rate table
       via the Kubernetes service proxy), plus config defaults.
 - [x] Grafana dashboard **srectl · SLO / Error Budget**.
-- [x] Runbooks + bilingual docs (`docs/*/SLO.md`) and site pages.
+- [x] Runbooks + bilingual docs (`docs/*/SLO.md`, `docs/*/SLO_E2E.md`) and site pages.
 
 **Acceptance criteria:**
 

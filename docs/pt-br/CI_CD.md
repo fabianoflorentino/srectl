@@ -51,7 +51,9 @@ As atualizações de tag são automatizadas via um passo leve no estilo renovate
 ## Pipeline E2E (`.github/workflows/e2e.yml`)
 
 Roda nightly e via `workflow_dispatch`. Testa o **commit exato** (o Argo CD aponta
-para `github.sha` via `SRECTL_ARGOCD_REVISION`), não o que estiver em `main`.
+para `github.sha` via `SRECTL_ARGOCD_REVISION`), não o que estiver em `main`. Para
+o registro completo da implementação, diagramas e a lista de problemas que o
+pipeline encontrou, veja [`SLO_E2E.md`](SLO_E2E.md).
 
 Passos:
 

@@ -52,7 +52,8 @@ Image tag updates are automated via a lightweight renovate/dependabot-style step
 
 Runs nightly and on `workflow_dispatch`. It tests the **exact commit** (Argo CD is
 pointed at `github.sha` via `SRECTL_ARGOCD_REVISION`), not whatever `main` happens
-to be.
+to be. For the full implementation record, diagrams and the list of problems this
+pipeline caught, see [`SLO_E2E.md`](SLO_E2E.md).
 
 Steps:
 

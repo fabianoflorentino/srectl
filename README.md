@@ -52,6 +52,7 @@ srectl down
 | Component catalog | [`en/STACK.md`](docs/en/STACK.md) | [`pt-br/STACK.md`](docs/pt-br/STACK.md) |
 | Observability | [`en/OBSERVABILITY.md`](docs/en/OBSERVABILITY.md) | [`pt-br/OBSERVABILITY.md`](docs/pt-br/OBSERVABILITY.md) |
 | SLO-as-code | [`en/SLO.md`](docs/en/SLO.md) | [`pt-br/SLO.md`](docs/pt-br/SLO.md) |
+| SLO + E2E implementation | [`en/SLO_E2E.md`](docs/en/SLO_E2E.md) | [`pt-br/SLO_E2E.md`](docs/pt-br/SLO_E2E.md) |
 | Security | [`en/SECURITY.md`](docs/en/SECURITY.md) | [`pt-br/SECURITY.md`](docs/pt-br/SECURITY.md) |
 | CI/CD | [`en/CI_CD.md`](docs/en/CI_CD.md) | [`pt-br/CI_CD.md`](docs/pt-br/CI_CD.md) |
 | GitOps | [`en/GITOPS.md`](docs/en/GITOPS.md) | [`pt-br/GITOPS.md`](docs/pt-br/GITOPS.md) |
@@ -131,6 +132,7 @@ srectl down
 | Catálogo de componentes | [`en/STACK.md`](docs/en/STACK.md) | [`pt-br/STACK.md`](docs/pt-br/STACK.md) |
 | Observabilidade | [`en/OBSERVABILITY.md`](docs/en/OBSERVABILITY.md) | [`pt-br/OBSERVABILITY.md`](docs/pt-br/OBSERVABILITY.md) |
 | SLO-as-code | [`en/SLO.md`](docs/en/SLO.md) | [`pt-br/SLO.md`](docs/pt-br/SLO.md) |
+| Implementação SLO + E2E | [`en/SLO_E2E.md`](docs/en/SLO_E2E.md) | [`pt-br/SLO_E2E.md`](docs/pt-br/SLO_E2E.md) |
 | Segurança | [`en/SECURITY.md`](docs/en/SECURITY.md) | [`pt-br/SECURITY.md`](docs/pt-br/SECURITY.md) |
 | CI/CD | [`en/CI_CD.md`](docs/en/CI_CD.md) | [`pt-br/CI_CD.md`](docs/pt-br/CI_CD.md) |
 | GitOps | [`en/GITOPS.md`](docs/en/GITOPS.md) | [`pt-br/GITOPS.md`](docs/pt-br/GITOPS.md) |

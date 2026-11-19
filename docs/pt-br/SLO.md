@@ -17,6 +17,9 @@ Juntas, ensinam o ciclo completo de SRE do Google sem sair do cluster kind local
 > (fork de [`google/slo-generator`](https://github.com/google/slo-generator)).
 > É uma ferramenta Python; o srectl a consome como imagem de container e mantém a
 > CLI Go como um task runner fino.
+>
+> O registro completo da implementação (arquitetura, loop de controle, pipeline
+> e2e e correções) está em [`SLO_E2E.md`](SLO_E2E.md).
 
 ## Conceitos em uma página
 

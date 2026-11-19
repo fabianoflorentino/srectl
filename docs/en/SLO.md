@@ -18,6 +18,9 @@ cluster.
 > (fork of [`google/slo-generator`](https://github.com/google/slo-generator)).
 > It is a Python tool; srectl consumes it as a container image and keeps the
 > Go CLI as a thin task runner.
+>
+> The full implementation record (architecture, control loop, e2e pipeline and
+> fixes) is in [`SLO_E2E.md`](SLO_E2E.md).
 
 ## Concepts in one page
 
