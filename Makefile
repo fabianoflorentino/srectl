@@ -5,6 +5,7 @@ COVERAGE_MIN=80
 VERSION?=$(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
 COMMIT?=$(shell git rev-parse --short HEAD 2>/dev/null || echo none)
 BUILD_DATE?=$(shell date -u +%Y-%m-%dT%H:%M:%SZ)
+SLO_IMAGE?=$(shell awk '/srectl-slo-generator/ {print $$2; exit}' deploy/slo/cronjob.yaml)
 
 LDFLAGS=-ldflags "-X github.com/fabianoflorentino/srectl/internal/version.Version=$(VERSION) \
 	-X github.com/fabianoflorentino/srectl/internal/version.Commit=$(COMMIT) \
@@ -62,9 +63,9 @@ fmt:
 docker-build:
 	docker build -t $(BINARY_NAME):$(VERSION) .
 
-## docker-build-slo: Build the slo-generator container image
+## docker-build-slo: Build the slo-generator image at the tag deploy/slo/cronjob.yaml pins
 docker-build-slo:
-	docker build -t srectl-slo-generator:$(VERSION) -f apps/slo-generator/Dockerfile .
+	docker build -t $(SLO_IMAGE) -f apps/slo-generator/Dockerfile .
 
 ## e2e: Verify a running cluster end-to-end (all services)
 e2e:
