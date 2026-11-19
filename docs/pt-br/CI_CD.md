@@ -11,7 +11,7 @@ flowchart LR
     L --> T["testes unitários (race)"]
     T --> B["build CLI + apps"]
     B --> IMG["build + push de imagens"]
-    B --> E2E["e2e: srectl up → demo verify → srectl down"]
+    B --> E2E["e2e: build de todas as imagens → srectl up → verifica cada serviço → down"]
     IMG --> E2E
     B --> SITE["build + publica o site"]
 ```
@@ -24,7 +24,7 @@ flowchart LR
 | `test` | `go test -race ./...` (CLI + apps) | todos passam, coverage ≥ 80% |
 | `build` | compila `srectl`, `api-a`, `api-b` | binários gerados |
 | `images` | build/push api-a, api-b (e mirrors dos projetos) | push no registry |
-| `e2e` | `srectl up && srectl demo verify && srectl down` no kind | todos os checks verdes |
+| `e2e` | build de todas as imagens → `srectl up` → verifica cluster + serviços + SLO + caos → `srectl down` | todos os checks verdes |
 | `site` | build do site Hugo → deploy GitHub Pages | site no ar no merge para `main` |
 
 ## Estratégia de imagens
@@ -48,17 +48,31 @@ Argo CD: detecta a mudança → sync → converge
 As atualizações de tag são automatizadas via um passo leve no estilo renovate/dependabot
 (ou um helper `make bump`) para que os manifests fiquem pinados e revisáveis.
 
-## Smoke test E2E (`srectl demo verify`)
+## Pipeline E2E (`.github/workflows/e2e.yml`)
 
-Valida, em ordem:
+Roda nightly e via `workflow_dispatch`. Testa o **commit exato** (o Argo CD aponta
+para `github.sha` via `SRECTL_ARGOCD_REVISION`), não o que estiver em `main`.
 
-1. Cluster + Argo CD saudáveis.
-2. Todos os Apps de componentes `Synced + Healthy`.
-3. Alvos de scrape do Prometheus `UP`.
-4. Requisição `api-a → api-b` retorna 200 com um trace id válido.
-5. Um erro forçado incrementa `http_errors_total` e dispara o alerta.
-6. Métrica `certificate_days_left` presente.
-7. Injeção de caos eleva a latência e a stack se recupera.
+Passos:
+
+1. Builda a CLI, as APIs demo, o `slo-generator`, o `fraudctl` (+ LB) e o
+   `certificate-validate` a partir do código, e carrega todas as imagens no kind.
+2. Cria o cluster e roda `srectl up` (o Argo CD sobe a plataforma).
+3. Espera todos os Applications do Argo CD ficarem `Synced + Healthy`.
+4. Roda [`scripts/e2e-verify.sh`](../../scripts/e2e-verify.sh), que valida:
+   - todos os pods de todos os namespaces estão `Ready` (pods de batch do
+     `slo-generator` excluídos);
+   - endpoints de ingress: `hello`, `api-a` (`/health`, `/ready`, `/orders`),
+     `fraudctl` (`/ready` + um `POST /fraud-score` real) e `seraph`;
+   - serviços in-cluster: Prometheus, Alertmanager, Grafana, Loki, Tempo, api-b,
+     stracectl e `/metrics` do certificate-validate;
+   - métricas presentes no Prometheus (`api_a_*`, `api_b_*`, ingress,
+     certificados, stracectl);
+   - `srectl slo compute` exporta `error_budget_burn_rate` e `srectl slo status`
+     lista os SLOs;
+   - um pod-kill de caos no fraudctl se recupera (pode ser pulado com `skip_chaos`).
+5. Em falha, despeja nodes, apps do Argo, pods, workloads, eventos e logs chave.
+6. Sempre roda `srectl down`.
 
 ## Equivalente local
 
@@ -69,5 +83,8 @@ make lint
 make test
 make build
 make site-dev    # site Hugo local (bilíngue)
-make e2e         # igual a: srectl up && srectl demo verify && srectl down
+make e2e         # verifica um cluster em execução (scripts/e2e-verify.sh)
 ```
+
+Para o pipeline completo localmente: build/carregue as imagens, `srectl up` e
+depois `make e2e`. Use `E2E_SKIP_CHAOS=true` para pular o drill de caos.

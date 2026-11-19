@@ -1,21 +1,37 @@
 name: e2e
 
-# Full-stack smoke test: kind cluster + srectl up + srectl demo verify + down.
-# Heavy (the whole LGTM + security + chaos stack), so it runs nightly/manually,
-# not on every PR.
+# Full end-to-end test on a real kind cluster: build every image, bring the
+# platform up with Argo CD, then verify the cluster, all services, ingress,
+# metrics, SLOs and a chaos drill. Heavy (LGTM + security + chaos), so it runs
+# nightly/manually instead of on every pull request.
 
 on:
   workflow_dispatch:
+    inputs:
+      skip_chaos:
+        description: Skip the chaos drill
+        type: boolean
+        default: false
   schedule:
     - cron: "0 6 * * *"
 
 permissions:
   contents: read
 
+concurrency:
+  group: e2e
+  cancel-in-progress: false
+
+env:
+  # Argo CD must reconcile the exact commit under test, not whatever main is at.
+  SRECTL_ARGOCD_REPO: ${{ github.server_url }}/${{ github.repository }}
+  SRECTL_ARGOCD_REVISION: ${{ github.sha }}
+  E2E_SKIP_CHAOS: ${{ inputs.skip_chaos || 'false' }}
+
 jobs:
   e2e:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -30,28 +46,86 @@ jobs:
           chmod +x ./kubectl && sudo mv ./kubectl /usr/local/bin/kubectl
           curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 
-      - name: Build CLI and demo images
+      - name: Build the srectl CLI
+        run: make build
+
+      - name: Build in-repo images
         run: |
-          make build
+          set -euo pipefail
           docker build -f apps/api-a/Dockerfile -t srectl/api-a:dev .
           docker build -f apps/api-b/Dockerfile -t srectl/api-b:dev .
+          SLO_IMAGE="$(awk '/srectl-slo-generator/ {print $2; exit}' deploy/slo/cronjob.yaml)"
+          test -n "$SLO_IMAGE" || { echo "::error::slo-generator image not found in deploy/slo/cronjob.yaml"; exit 1; }
+          docker build -t "$SLO_IMAGE" -f apps/slo-generator/Dockerfile .
+          echo "SLO_IMAGE=$SLO_IMAGE" >> "$GITHUB_ENV"
 
-      - name: srectl up
+      - name: Build project images (fraudctl, certificate-validate)
+        run: |
+          set -euo pipefail
+          git clone --depth 1 https://github.com/fabianoflorentino/fraudctl.git /tmp/fraudctl
+          docker build -t srectl/fraudctl:dev /tmp/fraudctl
+          docker build -t srectl/fraudctl-lb:dev /tmp/fraudctl/cmd/lb
+
+          git clone --depth 1 https://github.com/fabianoflorentino/certificate-validate.git /tmp/certificate-validate
+          docker build -t srectl/certificate-validate:dev /tmp/certificate-validate
+
+      - name: Create the kind cluster
+        run: ./bin/srectl cluster create
+
+      - name: Load images into kind
+        run: |
+          kind load docker-image \
+            srectl/api-a:dev \
+            srectl/api-b:dev \
+            srectl/fraudctl:dev \
+            srectl/fraudctl-lb:dev \
+            srectl/certificate-validate:dev \
+            "$SLO_IMAGE" \
+            --name srectl
+
+      - name: srectl up (bootstrap Argo CD and the platform)
         run: ./bin/srectl up
 
-      - name: Load demo images into kind
-        run: kind load docker-image srectl/api-a:dev srectl/api-b:dev --name srectl
+      - name: Point local hostnames at the kind ingress
+        run: |
+          sudo sh -c 'printf "127.0.0.1 hello.localhost api-a.localhost fraudctl.localhost seraph.localhost\n" >> /etc/hosts'
 
-      - name: Wait for the platform then verify
+      - name: Wait for Argo CD applications to converge
         run: |
           ./bin/srectl sync || true
-          for i in $(seq 1 60); do
+          for i in $(seq 1 90); do
             if ./bin/srectl demo verify; then
-              echo "platform healthy"; exit 0
+              echo "platform healthy"
+              exit 0
             fi
-            echo "waiting for apps to converge ($i/60)"; sleep 15
+            echo "waiting for apps to converge ($i/90)"
+            sleep 15
           done
-          echo "::error::platform did not converge in time"; ./bin/srectl status; exit 1
+          echo "::error::platform did not converge in time"
+          ./bin/srectl status
+          exit 1
+
+      - name: Verify the cluster and every service
+        run: ./scripts/e2e-verify.sh
+
+      - name: Diagnostics on failure
+        if: failure()
+        run: |
+          {
+            echo "=== nodes ==="; kubectl get nodes -o wide
+            echo "=== argocd applications ==="; kubectl get applications -n argocd -o wide
+            echo "=== pods ==="; kubectl get pods -A -o wide
+            echo "=== deployments/daemonsets/jobs ==="
+            for ns in argocd cert-manager chaos-mesh chaos demo ingress-nginx kyverno monitoring projects security; do
+              echo "--- $ns ---"
+              kubectl -n "$ns" get deploy,ds,sts,job,cronjob 2>/dev/null || true
+            done
+            echo "=== recent events ==="
+            kubectl get events -A --sort-by=.lastTimestamp | tail -80
+            echo "=== logs: api-a ==="; kubectl -n demo logs deploy/api-a --tail=80 || true
+            echo "=== logs: api-b ==="; kubectl -n demo logs deploy/api-b --tail=80 || true
+            echo "=== logs: fraudctl (lb) ==="; kubectl -n projects logs deploy/fraudctl -c lb --tail=80 || true
+          } >&2
 
       - name: srectl down (always)
         if: always()

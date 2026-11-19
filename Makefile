@@ -10,7 +10,7 @@ LDFLAGS=-ldflags "-X github.com/fabianoflorentino/srectl/internal/version.Versio
 	-X github.com/fabianoflorentino/srectl/internal/version.Commit=$(COMMIT) \
 	-X github.com/fabianoflorentino/srectl/internal/version.Date=$(BUILD_DATE)"
 
-.PHONY: all build clean test test-short lint lint-fix fmt docker-build install site-dev site-build help
+.PHONY: all build clean test test-short lint lint-fix fmt docker-build docker-build-slo e2e install site-dev site-build help
 
 .DEFAULT_GOAL := help
 
@@ -61,6 +61,14 @@ fmt:
 ## docker-build: Build the srectl container image
 docker-build:
 	docker build -t $(BINARY_NAME):$(VERSION) .
+
+## docker-build-slo: Build the slo-generator container image
+docker-build-slo:
+	docker build -t srectl-slo-generator:$(VERSION) -f apps/slo-generator/Dockerfile .
+
+## e2e: Verify a running cluster end-to-end (all services)
+e2e:
+	./scripts/e2e-verify.sh
 
 ## install: Install srectl to GOBIN
 install:
