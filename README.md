@@ -3,9 +3,9 @@
 A local, reproducible **SRE / DevOps / Platform Engineering** training environment on
 [kind](https://kind.sigs.k8s.io/), driven by a single Go CLI.
 
-> **Status: implemented (phases 0–9).** Cluster, GitOps, LGTM observability, security,
-> demo apps, project integrations, SRE drills, the docs site and CI are all in place —
-> see [`docs/en/PLAN.md`](docs/en/PLAN.md).
+> **Status: implemented (phases 0–10).** Cluster, GitOps, LGTM observability, security,
+> demo apps, project integrations, SRE drills, SLO-as-code, the docs site and CI are all
+> in place — see [`docs/en/PLAN.md`](docs/en/PLAN.md).
 
 ## What it is
 
@@ -14,6 +14,9 @@ One command (`srectl up`) brings up a complete platform on a local kind cluster:
 - **GitOps** — Argo CD (app-of-apps).
 - **Observability (LGTM)** — Prometheus + Grafana + Alertmanager, Loki + Alloy (logs),
   Tempo (traces via OTLP), and metrics-server (cluster metrics / `kubectl top`).
+- **SLO-as-code** — [slo-generator](https://github.com/fabianoflorentino/slo-generator)
+  computes error budgets, burn rates and multi-window policies from declarative
+  `ServiceLevelObjective` resources, exported back to Prometheus.
 - **Security** — Trivy Operator, Falco, Kyverno, cert-manager, NetworkPolicies.
 - **Chaos** — chaos-mesh for SRE drills.
 - **Demo apps** — two instrumented Go APIs (api-a → api-b) for distributed tracing,
@@ -35,6 +38,8 @@ make build && srectl up
 srectl open grafana
 srectl demo load      # generate traffic
 srectl demo chaos     # inject faults
+srectl slo compute    # compute error budgets + burn rates
+srectl slo status     # show the burn-rate table
 srectl down
 ```
 
@@ -46,6 +51,7 @@ srectl down
 | Architecture | [`en/ARCHITECTURE.md`](docs/en/ARCHITECTURE.md) | [`pt-br/ARCHITECTURE.md`](docs/pt-br/ARCHITECTURE.md) |
 | Component catalog | [`en/STACK.md`](docs/en/STACK.md) | [`pt-br/STACK.md`](docs/pt-br/STACK.md) |
 | Observability | [`en/OBSERVABILITY.md`](docs/en/OBSERVABILITY.md) | [`pt-br/OBSERVABILITY.md`](docs/pt-br/OBSERVABILITY.md) |
+| SLO-as-code | [`en/SLO.md`](docs/en/SLO.md) | [`pt-br/SLO.md`](docs/pt-br/SLO.md) |
 | Security | [`en/SECURITY.md`](docs/en/SECURITY.md) | [`pt-br/SECURITY.md`](docs/pt-br/SECURITY.md) |
 | CI/CD | [`en/CI_CD.md`](docs/en/CI_CD.md) | [`pt-br/CI_CD.md`](docs/pt-br/CI_CD.md) |
 | GitOps | [`en/GITOPS.md`](docs/en/GITOPS.md) | [`pt-br/GITOPS.md`](docs/pt-br/GITOPS.md) |
@@ -76,9 +82,9 @@ To be determined (see LICENSE once added).
 Um ambiente de treinamento **SRE / DevOps / Platform Engineering** local e reprodutível
 em [kind](https://kind.sigs.k8s.io/), dirigido por uma única CLI em Go.
 
-> **Status: implementado (fases 0–9).** Cluster, GitOps, observabilidade LGTM, segurança,
-> apps demo, integração dos projetos, drills de SRE, site de docs e CI estão prontos —
-> veja [`docs/pt-br/PLAN.md`](docs/pt-br/PLAN.md).
+> **Status: implementado (fases 0–10).** Cluster, GitOps, observabilidade LGTM, segurança,
+> apps demo, integração dos projetos, drills de SRE, SLO-as-code, site de docs e CI estão
+> prontos — veja [`docs/pt-br/PLAN.md`](docs/pt-br/PLAN.md).
 
 ## O que é
 
@@ -87,6 +93,9 @@ Um comando (`srectl up`) sobe uma plataforma completa num cluster kind local:
 - **GitOps** — Argo CD (app-of-apps).
 - **Observabilidade (LGTM)** — Prometheus + Grafana + Alertmanager, Loki + Alloy (logs),
   Tempo (traces via OTLP) e metrics-server (métricas de cluster / `kubectl top`).
+- **SLO-as-code** — o [slo-generator](https://github.com/fabianoflorentino/slo-generator)
+  calcula error budgets, burn rates e políticas multi-janela a partir de recursos
+  `ServiceLevelObjective` declarativos, exportados de volta para o Prometheus.
 - **Segurança** — Trivy Operator, Falco, Kyverno, cert-manager, NetworkPolicies.
 - **Caos** — chaos-mesh para drills de SRE.
 - **Apps demo** — duas APIs Go instrumentadas (api-a → api-b) para tracing distribuído,
@@ -108,6 +117,8 @@ make build && srectl up
 srectl open grafana
 srectl demo load      # gera tráfego
 srectl demo chaos     # injeta falhas
+srectl slo compute    # calcula error budgets + burn rates
+srectl slo status     # mostra a tabela de burn rate
 srectl down
 ```
 
@@ -119,6 +130,7 @@ srectl down
 | Arquitetura | [`en/ARCHITECTURE.md`](docs/en/ARCHITECTURE.md) | [`pt-br/ARCHITECTURE.md`](docs/pt-br/ARCHITECTURE.md) |
 | Catálogo de componentes | [`en/STACK.md`](docs/en/STACK.md) | [`pt-br/STACK.md`](docs/pt-br/STACK.md) |
 | Observabilidade | [`en/OBSERVABILITY.md`](docs/en/OBSERVABILITY.md) | [`pt-br/OBSERVABILITY.md`](docs/pt-br/OBSERVABILITY.md) |
+| SLO-as-code | [`en/SLO.md`](docs/en/SLO.md) | [`pt-br/SLO.md`](docs/pt-br/SLO.md) |
 | Segurança | [`en/SECURITY.md`](docs/en/SECURITY.md) | [`pt-br/SECURITY.md`](docs/pt-br/SECURITY.md) |
 | CI/CD | [`en/CI_CD.md`](docs/en/CI_CD.md) | [`pt-br/CI_CD.md`](docs/pt-br/CI_CD.md) |
 | GitOps | [`en/GITOPS.md`](docs/en/GITOPS.md) | [`pt-br/GITOPS.md`](docs/pt-br/GITOPS.md) |

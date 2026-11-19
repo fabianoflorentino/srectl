@@ -36,7 +36,7 @@ func TestHelpListsCommands(t *testing.T) {
 		t.Fatalf("execute --help: %v", err)
 	}
 
-	for _, want := range []string{"up", "down", "status", "cluster", "demo", "open", "version"} {
+	for _, want := range []string{"up", "down", "status", "cluster", "demo", "slo", "open", "version"} {
 		if !strings.Contains(out.String(), want) {
 			t.Errorf("help output missing command %q", want)
 		}

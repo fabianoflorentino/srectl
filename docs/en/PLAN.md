@@ -311,6 +311,35 @@ Tasks:
 
 ---
 
+## Phase 10 — SLO-as-code with slo-generator
+
+**Objective:** model SLOs, error budgets and burn-rate policies as versioned
+resources and teach the full SRE alerting loop.
+
+Tasks:
+
+- [x] Package [`fabianoflorentino/slo-generator`](https://github.com/fabianoflorentino/slo-generator)
+      as a pinned container image (`apps/slo-generator/Dockerfile`, `images.yml`).
+- [x] `deploy/slo/`: shared config (Prometheus backend, Pushgateway exporter,
+      1h/6h/3d error-budget policy) and one `ServiceLevelObjective` per service.
+- [x] CronJob + Pushgateway + ServiceMonitor so Prometheus stores the computed
+      `error_budget_burn_rate`, `sli_measurement` and `slo_target` series.
+- [x] GitOps app (`deploy/bootstrap/apps/slo-app.yaml`) applies the folder.
+- [x] `srectl slo compute` (one-off Job) and `srectl slo status` (burn-rate table
+      via the Kubernetes service proxy), plus config defaults.
+- [x] Grafana dashboard **srectl · SLO / Error Budget**.
+- [x] Runbooks + bilingual docs (`docs/*/SLO.md`) and site pages.
+
+**Acceptance criteria:**
+
+- `srectl slo compute` completes a Job and `srectl slo status` shows every SLO
+  below its burn-rate threshold on a healthy cluster.
+- A latency chaos drill on api-a raises its burn rate above the 1h threshold and
+  turns the dashboard red.
+- Every new page exists in EN and PT-BR and `make coverage` stays ≥ 80%.
+
+---
+
 ## Definition of done (per phase)
 
 - [ ] Code merged (English, conventional commits).

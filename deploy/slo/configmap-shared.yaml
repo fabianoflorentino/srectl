@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: slo-generator-config
+  namespace: monitoring
+  labels:
+    app: slo-generator
+data:
+  config.yaml: |
+    backends:
+      prometheus:
+        url: http://kube-prometheus-stack-prometheus.monitoring.svc:9090
+
+    exporters:
+      prometheus:
+        url: http://slo-generator-pushgateway.monitoring.svc:9091
+        job: slo-generator
+
+    error_budget_policies:
+      default:
+        steps:
+          - name: 1 hour
+            burn_rate_threshold: 14.4
+            alert: true
+            message_alert: Page the on-call engineer to defend the SLO
+            message_ok: Last hour on track
+            window: 3600
+          - name: 6 hours
+            burn_rate_threshold: 6
+            alert: true
+            message_alert: Page the on-call engineer to defend the SLO
+            message_ok: Last 6 hours on track
+            window: 21600
+          - name: 3 days
+            burn_rate_threshold: 1
+            alert: false
+            message_alert: Freeze releases unless reliability or security related
+            message_ok: Release policy stays unchanged
+            window: 259200

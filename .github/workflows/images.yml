@@ -11,6 +11,7 @@ on:
     paths:
       - "apps/api-a/**"
       - "apps/api-b/**"
+      - "apps/slo-generator/**"
       - "go.mod"
       - "go.sum"
       - ".github/workflows/images.yml"
@@ -25,7 +26,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        app: [api-a, api-b]
+        app: [api-a, api-b, slo-generator]
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3

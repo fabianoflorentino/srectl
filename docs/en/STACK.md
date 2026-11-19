@@ -29,6 +29,8 @@ Legend — install method:
 | Tempo | Distributed tracing backend | GitOps (Helm) | Grafana-native traces |
 | OpenTelemetry SDK (in-app) | Traces from api-a/api-b via OTLP | built into the apps | no extra service |
 | Grafana | Dashboards + unified UI | GitOps (Helm) | Single pane of glass |
+| slo-generator | Declarative SLOs, error budgets, burn rate | GitOps (CronJob) | SLO-as-code + error-budget policy, exports to Prometheus |
+| Pushgateway | Receives the metrics computed by slo-generator | GitOps | Standard scrape target for batch jobs |
 
 ## Security
 

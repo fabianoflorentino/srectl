@@ -1,0 +1,70 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: slo-generator-slos
+  namespace: monitoring
+  labels:
+    app: slo-generator
+data:
+  api-a-availability.yaml: |
+    apiVersion: sre.google.com/v2
+    kind: ServiceLevelObjective
+    metadata:
+      name: api-a-availability
+      labels:
+        service_name: api-a
+        feature_name: orders
+        slo_name: availability
+    spec:
+      description: 99.5% of GET /orders requests on api-a must not return a 5xx
+      goal: 0.995
+      backend: prometheus
+      method: good_bad_ratio
+      error_budget_policy: default
+      exporters:
+        - prometheus
+      service_level_indicator:
+        filter_good: api_a_http_requests_total{route="GET /orders",status!~"5.."}[window]
+        filter_valid: api_a_http_requests_total{route="GET /orders"}[window]
+
+  api-a-latency.yaml: |
+    apiVersion: sre.google.com/v2
+    kind: ServiceLevelObjective
+    metadata:
+      name: api-a-latency
+      labels:
+        service_name: api-a
+        feature_name: orders
+        slo_name: latency
+    spec:
+      description: 99% of GET /orders requests on api-a must complete in under 20ms
+      goal: 0.99
+      backend: prometheus
+      method: distribution_cut
+      error_budget_policy: default
+      exporters:
+        - prometheus
+      service_level_indicator:
+        expression: api_a_http_request_duration_seconds_bucket{route="GET /orders"}
+        threshold_bucket: 0.02
+
+  fraudctl-availability.yaml: |
+    apiVersion: sre.google.com/v2
+    kind: ServiceLevelObjective
+    metadata:
+      name: fraudctl-availability
+      labels:
+        service_name: fraudctl
+        feature_name: fraud-score
+        slo_name: availability
+    spec:
+      description: 99.5% of fraudctl requests at the ingress must not return a 5xx
+      goal: 0.995
+      backend: prometheus
+      method: good_bad_ratio
+      error_budget_policy: default
+      exporters:
+        - prometheus
+      service_level_indicator:
+        filter_good: nginx_ingress_controller_requests{ingress="fraudctl",status!~"5.."}[window]
+        filter_valid: nginx_ingress_controller_requests{ingress="fraudctl"}[window]

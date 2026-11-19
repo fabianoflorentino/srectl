@@ -24,4 +24,10 @@ monitoring:
   grafana:
     secret: kube-prometheus-stack-grafana
 
+slo:
+  namespace: monitoring
+  cronjob: slo-generator
+  service: kube-prometheus-stack-prometheus
+  port: 9090
+
 registry: localhost:5000 # image registry for local builds

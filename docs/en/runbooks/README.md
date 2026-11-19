@@ -38,3 +38,19 @@ how to confirm, and how to mitigate.
 4. Force a renewal: annotate the Certificate with
    `cert-manager.io/issue-temporary-certificate` or delete the pending
    CertificateRequest. The CA Issuer is `srectl-ca` in namespace `demo`.
+
+## ErrorBudgetBurn (slo-generator)
+
+**Signal:** `error_budget_burn_rate{service_name,slo_name}` above
+`alerting_burn_rate_threshold` (1h page at 14.4x, 6h page at 6x, 3d freeze at 1x).
+
+1. Confirm the scope: `srectl slo status` (or the Grafana dashboard
+   **srectl · SLO / Error Budget**) to see which service/SLO is burning.
+2. Confirm it is real, not a query bug: open `srectl · App RED`/`srectl · Golden
+   Signals` and check that the SLI itself dropped (5xx or latency).
+3. Check the policy step that fired — 1h/6h means **page**; 3d means **freeze
+   releases** unless reliability/security related.
+4. Mitigate like any SLO incident: follow the `ApiAHighErrorRate` /
+   `ApiAHighLatency` runbook, or `kubectl rollout undo` the suspect deploy.
+5. Recompute and re-check: `srectl slo compute && srectl slo status`. The burn
+   rate must fall below the threshold before closing the incident.

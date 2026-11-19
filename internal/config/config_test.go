@@ -25,6 +25,18 @@ func TestLoadDefaults(t *testing.T) {
 	if !cfg.Components.Observability {
 		t.Errorf("components.observability = false, want true")
 	}
+	if cfg.SLO.Namespace != "monitoring" {
+		t.Errorf("slo.namespace = %q, want %q", cfg.SLO.Namespace, "monitoring")
+	}
+	if cfg.SLO.CronJob != "slo-generator" {
+		t.Errorf("slo.cronjob = %q, want %q", cfg.SLO.CronJob, "slo-generator")
+	}
+	if cfg.SLO.Service != "kube-prometheus-stack-prometheus" {
+		t.Errorf("slo.service = %q, want %q", cfg.SLO.Service, "kube-prometheus-stack-prometheus")
+	}
+	if cfg.SLO.Port != 9090 {
+		t.Errorf("slo.port = %d, want 9090", cfg.SLO.Port)
+	}
 }
 
 func TestLoadEnvOverride(t *testing.T) {

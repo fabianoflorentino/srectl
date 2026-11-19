@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: slo-generator-pushgateway
+  namespace: monitoring
+  labels:
+    app: slo-generator-pushgateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: slo-generator-pushgateway
+  template:
+    metadata:
+      labels:
+        app: slo-generator-pushgateway
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        runAsGroup: 65534
+        fsGroup: 65534
+      containers:
+        - name: pushgateway
+          image: prom/pushgateway:v1.11.1
+          args:
+            - --web.listen-address=:9091
+            - --persistence.file=/data/pushgateway.data
+            - --persistence.interval=5m
+          ports:
+            - name: http
+              containerPort: 9091
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: data
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: slo-generator-pushgateway
+  namespace: monitoring
+  labels:
+    app: slo-generator-pushgateway
+spec:
+  selector:
+    app: slo-generator-pushgateway
+  ports:
+    - name: http
+      port: 9091
+      targetPort: 9091
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: slo-generator-pushgateway
+  namespace: monitoring
+  labels:
+    release: kube-prometheus-stack
+spec:
+  selector:
+    matchLabels:
+      app: slo-generator-pushgateway
+  endpoints:
+    - port: http
+      interval: 30s
+      honorLabels: true

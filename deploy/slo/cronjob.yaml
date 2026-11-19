@@ -1,0 +1,70 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: slo-generator
+  namespace: monitoring
+  labels:
+    app: slo-generator
+spec:
+  schedule: "* * * * *"
+  concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 30
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      ttlSecondsAfterFinished: 120
+      template:
+        metadata:
+          labels:
+            app: slo-generator
+        spec:
+          restartPolicy: OnFailure
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 65532
+            runAsGroup: 65532
+            fsGroup: 65532
+          containers:
+            - name: slo-generator
+              image: ghcr.io/fabianoflorentino/srectl-slo-generator:v0.1.0
+              imagePullPolicy: IfNotPresent
+              args:
+                - compute
+                - -f
+                - /etc/slo/slos
+                - -c
+                - /etc/slo/config/config.yaml
+                - --export
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop:
+                    - ALL
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 64Mi
+                limits:
+                  cpu: 500m
+                  memory: 256Mi
+              volumeMounts:
+                - name: config
+                  mountPath: /etc/slo/config
+                  readOnly: true
+                - name: slos
+                  mountPath: /etc/slo/slos
+                  readOnly: true
+                - name: tmp
+                  mountPath: /tmp
+          volumes:
+            - name: config
+              configMap:
+                name: slo-generator-config
+            - name: slos
+              configMap:
+                name: slo-generator-slos
+            - name: tmp
+              emptyDir: {}

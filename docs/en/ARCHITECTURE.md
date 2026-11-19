@@ -31,6 +31,8 @@ flowchart TB
             LOKI["Loki"]
             ALLOY["Alloy"]
             TEMPO["Tempo"]
+            SLO["slo-generator\n(CronJob)"]
+            PUSH["Pushgateway"]
         end
 
         subgraph Sec["Security"]
@@ -61,6 +63,9 @@ flowchart TB
     ALLOY --> LOKI
     FALCO --> LOKI & AM
     PROM --> AM & GRAF
+    SLO -->|"PromQL"| PROM
+    SLO -->|"burn rate"| PUSH
+    PUSH -->|"scrape"| PROM
     CM -.->|"inject faults"| APIA & FRAUD
 ```
 
@@ -164,6 +169,8 @@ flowchart LR
         CV["certificate-validate"]
         STRACE["stracectl"]
         KUBE["kube-state-metrics\nnode-exporter"]
+        SLO["slo-generator"]
+        PUSH["Pushgateway"]
     end
 
     APIA -->|metrics| PROM
@@ -187,6 +194,10 @@ flowchart LR
     TEMPO --> GRAF
     PROM --> AM
     FALCO --> AM
+
+    SLO -->|PromQL| PROM
+    SLO -->|metrics| PUSH
+    PUSH -->|scrape| PROM
 ```
 
 ## Security data flow

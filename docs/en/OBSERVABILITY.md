@@ -69,6 +69,13 @@ SyscallAnomaly      syscall error rate spike (stracectl)
 
 ## SLO / SLI definitions
 
+SLOs are modelled in two layers:
+
+| Layer | Where | What it answers |
+| --- | --- | --- |
+| Recording rules | `deploy/observability/slo-rules.yaml` | how is the SLI right now? |
+| `slo-generator` | `deploy/slo/` | how much budget did we spend, how fast, and must we page? |
+
 | Service | SLI | SLO |
 | --- | --- | --- |
 | api-a `/orders` | availability = good/(good+bad) over 5m | 99.5% (monthly) |
@@ -76,7 +83,11 @@ SyscallAnomaly      syscall error rate spike (stracectl)
 | fraudctl `/fraud-score` | availability + latency p99 | 99.5% / < 20ms |
 | TLS certs | days-left > 0 | 100% (no expiry) |
 
-Recording rules pre-compute the SLI time series; Grafana SLO dashboards show burn-rate.
+The declarative layer computes **error budget**, **burn rate** and the
+**error-budget policy** (1h / 6h / 3d) and exports them to Prometheus through a
+Pushgateway. `srectl slo compute` triggers a run; `srectl slo status` prints the
+burn-rate table; the Grafana dashboard **srectl · SLO / Error Budget** plots it.
+See [`SLO.md`](SLO.md) for the full design and the lab.
 
 ## Chaos → observability loop
 
@@ -95,6 +106,7 @@ chaos-mesh injects faults; the observability stack is how we *detect* them:
 | Prometheus | `srectl open prometheus` |
 | Alertmanager | `srectl open alertmanager` |
 | App metrics | `srectl open api-a` → `/metrics` |
+| SLO burn rate | `srectl slo status` (or the `srectl · SLO / Error Budget` dashboard) |
 
 All are also reachable via ingress (`grafana.localhost`, `prometheus.localhost`, ...)
 once ingress + cert-manager are up.

@@ -30,7 +30,7 @@ func NewMetrics(service string) *Metrics {
 		Namespace: service,
 		Name:      "http_request_duration_seconds",
 		Help:      "HTTP request duration in seconds by route and method.",
-		Buckets:   prometheus.DefBuckets,
+		Buckets:   []float64{0.005, 0.01, 0.02, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10},
 	}, []string{"route", "method"})
 	reg.MustRegister(requests, duration,
 		collectors.NewGoCollector(),

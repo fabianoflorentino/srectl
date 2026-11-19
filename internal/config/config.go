@@ -19,6 +19,7 @@ type Config struct {
 	Components Components `mapstructure:"components"`
 	Argocd     Argocd     `mapstructure:"argocd"`
 	Monitoring Monitoring `mapstructure:"monitoring"`
+	SLO        SLO        `mapstructure:"slo"`
 	Registry   string     `mapstructure:"registry"`
 }
 
@@ -57,6 +58,14 @@ type Grafana struct {
 	Secret string `mapstructure:"secret"`
 }
 
+// SLO configures the slo-generator integration (CronJob and Prometheus).
+type SLO struct {
+	Namespace string `mapstructure:"namespace"`
+	CronJob   string `mapstructure:"cronjob"`
+	Service   string `mapstructure:"service"`
+	Port      int    `mapstructure:"port"`
+}
+
 // NewViper returns a viper instance configured for srectl: defaults, a YAML
 // config file (optional) and SRECTL_* environment overrides.
 func NewViper() *viper.Viper {
@@ -89,6 +98,10 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("argocd.revision", "main")
 	v.SetDefault("monitoring.namespace", "monitoring")
 	v.SetDefault("monitoring.grafana.secret", "kube-prometheus-stack-grafana")
+	v.SetDefault("slo.namespace", "monitoring")
+	v.SetDefault("slo.cronjob", "slo-generator")
+	v.SetDefault("slo.service", "kube-prometheus-stack-prometheus")
+	v.SetDefault("slo.port", 9090)
 	v.SetDefault("registry", "localhost:5000")
 }
 

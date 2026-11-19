@@ -29,6 +29,8 @@ Legenda — método de instalação:
 | Tempo | Backend de tracing distribuído | GitOps (Helm) | Traces nativos do Grafana |
 | SDK OpenTelemetry (nas apps) | Traces de api-a/api-b via OTLP | embutido nas apps | sem serviço extra |
 | Grafana | Dashboards + UI unificada | GitOps (Helm) | Painel único |
+| slo-generator | SLOs declarativos, error budgets, burn rate | GitOps (CronJob) | SLO-as-code + política de error budget, exporta para o Prometheus |
+| Pushgateway | Recebe as métricas calculadas pelo slo-generator | GitOps | Alvo de scrape padrão para jobs em lote |
 
 ## Segurança
 
