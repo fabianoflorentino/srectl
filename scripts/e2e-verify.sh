@@ -135,6 +135,14 @@ check_metric "ingress requests" 'count(nginx_ingress_controller_requests)'
 check_metric "certificate_days_left" 'count(certificate_days_left)'
 check_metric "stracectl metrics" 'count({__name__=~"stracectl_.+"})'
 
+log "Generate traffic for the SLOs"
+"$BIN" demo load --url https://api-a.localhost --duration 30s --rps 10 || fail "load generation failed"
+for _ in $(seq 1 30); do
+  curl -ksS -o /dev/null -X POST -H 'Content-Type: application/json' \
+    --data "$fraud_body" http://fraudctl.localhost/fraud-score || true
+done
+sleep 20
+
 log "SLO computation (slo-generator)"
 "$BIN" slo compute || fail "srectl slo compute failed"
 for _ in $(seq 1 40); do
