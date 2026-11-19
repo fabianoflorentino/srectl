@@ -15,10 +15,10 @@ import (
 
 // Queries read the metrics written by the slo-generator Prometheus exporter.
 const (
-	// BurnRateQuery returns the current error-budget burn rate per SLO.
-	BurnRateQuery = `max by (service_name, slo_name) (error_budget_burn_rate)`
-	// ThresholdQuery returns the alerting burn-rate threshold per SLO.
-	ThresholdQuery = `max by (service_name, slo_name) (alerting_burn_rate_threshold)`
+	// BurnRateQuery returns the error-budget burn rate per SLO and policy step.
+	BurnRateQuery = `max by (service_name, slo_name, error_budget_policy_step_name) (error_budget_burn_rate)`
+	// ThresholdQuery returns the alerting burn-rate threshold per SLO and step.
+	ThresholdQuery = `max by (service_name, slo_name, error_budget_policy_step_name) (alerting_burn_rate_threshold)`
 )
 
 // Runner is the subset of *k8s.Client the SLO workflows need.
@@ -27,10 +27,11 @@ type Runner interface {
 	Output(ctx context.Context, args ...string) ([]byte, error)
 }
 
-// Row is one SLO's exported burn-rate state.
+// Row is one SLO's exported burn-rate state at its worst policy step.
 type Row struct {
 	Service   string
 	SLO       string
+	Step      string
 	BurnRate  float64
 	Threshold float64
 }
@@ -38,6 +39,13 @@ type Row struct {
 // Alerting reports whether the burn rate exceeds a positive threshold.
 func (r Row) Alerting() bool {
 	return r.Threshold > 0 && r.BurnRate > r.Threshold
+}
+
+func (r Row) ratio() float64 {
+	if r.Threshold <= 0 {
+		return 0
+	}
+	return r.BurnRate / r.Threshold
 }
 
 // Client drives the slo-generator CronJob and Prometheus.
@@ -96,14 +104,26 @@ func (c *Client) Status(ctx context.Context, namespace, service string, port int
 		return nil, err
 	}
 
-	rows := make([]Row, 0, len(burn))
+	worst := make(map[rowKey]Row, len(burn))
 	for key, rate := range burn {
-		rows = append(rows, Row{
+		row := Row{
 			Service:   key.service,
 			SLO:       key.slo,
+			Step:      key.step,
 			BurnRate:  rate,
 			Threshold: thresholds[key],
-		})
+		}
+		rk := rowKey{service: key.service, slo: key.slo}
+		current, ok := worst[rk]
+		if !ok || row.ratio() > current.ratio() ||
+			(row.ratio() == current.ratio() && row.Step < current.Step) {
+			worst[rk] = row
+		}
+	}
+
+	rows := make([]Row, 0, len(worst))
+	for _, row := range worst {
+		rows = append(rows, row)
 	}
 	sort.Slice(rows, func(i, j int) bool {
 		if rows[i].Service != rows[j].Service {
@@ -115,6 +135,12 @@ func (c *Client) Status(ctx context.Context, namespace, service string, port int
 }
 
 type seriesKey struct {
+	service string
+	slo     string
+	step    string
+}
+
+type rowKey struct {
 	service string
 	slo     string
 }
@@ -144,7 +170,11 @@ func (c *Client) query(ctx context.Context, namespace, service string, port int,
 		if err != nil {
 			return nil, err
 		}
-		result[seriesKey{service: s.Metric["service_name"], slo: s.Metric["slo_name"]}] = value
+		result[seriesKey{
+			service: s.Metric["service_name"],
+			slo:     s.Metric["slo_name"],
+			step:    s.Metric["error_budget_policy_step_name"],
+		}] = value
 	}
 	return result, nil
 }
@@ -155,8 +185,8 @@ func Write(w io.Writer, rows []Row) error {
 		_, err := fmt.Fprintln(w, "slo: no exported metrics yet — run `srectl slo compute` and try again")
 		return err
 	}
-	if _, err := fmt.Fprintf(w, "%-10s %-14s %9s %10s  %s\n",
-		"SERVICE", "SLO", "BURN RATE", "THRESHOLD", "STATE"); err != nil {
+	if _, err := fmt.Fprintf(w, "%-10s %-14s %-9s %9s %10s  %s\n",
+		"SERVICE", "SLO", "STEP", "BURN RATE", "THRESHOLD", "STATE"); err != nil {
 		return err
 	}
 	for _, row := range rows {
@@ -164,8 +194,8 @@ func Write(w io.Writer, rows []Row) error {
 		if row.Alerting() {
 			state = "BURNING"
 		}
-		if _, err := fmt.Fprintf(w, "%-10s %-14s %9.2f %10.2f  %s\n",
-			row.Service, row.SLO, row.BurnRate, row.Threshold, state); err != nil {
+		if _, err := fmt.Fprintf(w, "%-10s %-14s %-9s %9.2f %10.2f  %s\n",
+			row.Service, row.SLO, row.Step, row.BurnRate, row.Threshold, state); err != nil {
 			return err
 		}
 	}

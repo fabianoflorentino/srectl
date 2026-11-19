@@ -148,6 +148,59 @@ func TestStatusSortsRows(t *testing.T) {
 	}
 }
 
+func TestStatusPicksWorstStep(t *testing.T) {
+	runner := &fakeRunner{outputFn: func(args []string) ([]byte, error) {
+		if strings.Contains(args[2], "alerting_burn_rate_threshold") {
+			return []byte(`{"status":"success","data":{"result":[` +
+				`{"metric":{"service_name":"api-a","slo_name":"latency","error_budget_policy_step_name":"1 hour"},"value":[1,"14.4"]},` +
+				`{"metric":{"service_name":"api-a","slo_name":"latency","error_budget_policy_step_name":"3 days"},"value":[1,"1"]}]}}`), nil
+		}
+		return []byte(`{"status":"success","data":{"result":[` +
+			`{"metric":{"service_name":"api-a","slo_name":"latency","error_budget_policy_step_name":"1 hour"},"value":[1,"1"]},` +
+			`{"metric":{"service_name":"api-a","slo_name":"latency","error_budget_policy_step_name":"3 days"},"value":[1,"2"]}]}}`), nil
+	}}
+	client := New(runner)
+
+	rows, err := client.Status(context.Background(), "monitoring", "prom", 9090)
+	if err != nil {
+		t.Fatalf("Status: %v", err)
+	}
+	if len(rows) != 1 {
+		t.Fatalf("rows = %d, want 1", len(rows))
+	}
+	if rows[0].Step != "3 days" {
+		t.Errorf("step = %q, want %q", rows[0].Step, "3 days")
+	}
+	if !rows[0].Alerting() {
+		t.Error("Alerting() = false, want true for the worst step")
+	}
+}
+
+func TestStatusTieBreaksByStep(t *testing.T) {
+	runner := &fakeRunner{outputFn: func(args []string) ([]byte, error) {
+		if strings.Contains(args[2], "alerting_burn_rate_threshold") {
+			return []byte(`{"status":"success","data":{"result":[` +
+				`{"metric":{"service_name":"api-a","slo_name":"latency","error_budget_policy_step_name":"1 hour"},"value":[1,"14.4"]},` +
+				`{"metric":{"service_name":"api-a","slo_name":"latency","error_budget_policy_step_name":"3 days"},"value":[1,"1"]}]}}`), nil
+		}
+		return []byte(`{"status":"success","data":{"result":[` +
+			`{"metric":{"service_name":"api-a","slo_name":"latency","error_budget_policy_step_name":"1 hour"},"value":[1,"0"]},` +
+			`{"metric":{"service_name":"api-a","slo_name":"latency","error_budget_policy_step_name":"3 days"},"value":[1,"0"]}]}}`), nil
+	}}
+	client := New(runner)
+
+	rows, err := client.Status(context.Background(), "monitoring", "prom", 9090)
+	if err != nil {
+		t.Fatalf("Status: %v", err)
+	}
+	if len(rows) != 1 {
+		t.Fatalf("rows = %d, want 1", len(rows))
+	}
+	if rows[0].Step != "1 hour" {
+		t.Errorf("step = %q, want the deterministic first step", rows[0].Step)
+	}
+}
+
 func TestStatusBurnQueryError(t *testing.T) {
 	runner := &fakeRunner{outputFn: func([]string) ([]byte, error) { return nil, errors.New("boom") }}
 	client := New(runner)
@@ -225,14 +278,14 @@ func TestWriteEmpty(t *testing.T) {
 func TestWriteRows(t *testing.T) {
 	var buf bytes.Buffer
 	rows := []Row{
-		{Service: "api-a", SLO: "availability", BurnRate: 0.5, Threshold: 14.4},
-		{Service: "api-a", SLO: "latency", BurnRate: 20, Threshold: 14.4},
+		{Service: "api-a", SLO: "availability", Step: "1 hour", BurnRate: 0.5, Threshold: 14.4},
+		{Service: "api-a", SLO: "latency", Step: "3 days", BurnRate: 20, Threshold: 14.4},
 	}
 	if err := Write(&buf, rows); err != nil {
 		t.Fatalf("Write: %v", err)
 	}
 	out := buf.String()
-	for _, want := range []string{"SERVICE", "BURN RATE", "THRESHOLD", "api-a", "availability", "latency", "0.50", "20.00", "ok", "BURNING"} {
+	for _, want := range []string{"SERVICE", "STEP", "BURN RATE", "THRESHOLD", "api-a", "availability", "latency", "1 hour", "3 days", "0.50", "20.00", "ok", "BURNING"} {
 		if !strings.Contains(out, want) {
 			t.Errorf("output missing %q:\n%s", want, out)
 		}
