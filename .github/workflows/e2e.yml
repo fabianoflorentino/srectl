@@ -69,6 +69,16 @@ jobs:
           git clone --depth 1 https://github.com/fabianoflorentino/certificate-validate.git /tmp/certificate-validate
           docker build -t srectl/certificate-validate:dev /tmp/certificate-validate
 
+      - name: Raise inotify limits
+        # The full stack (Falco, chaos-mesh and the controllers) opens many
+        # inotify instances; runners default too low and fail with
+        # "could not initialize inotify handler" / "too many open files".
+        run: |
+          sudo sysctl -w fs.inotify.max_user_instances=8192
+          sudo sysctl -w fs.inotify.max_user_watches=524288
+          sudo sysctl -w fs.inotify.max_queued_events=32768
+          sudo sysctl -w fs.file-max=2097152
+
       - name: Create the kind cluster
         run: ./bin/srectl cluster create
 
@@ -125,6 +135,9 @@ jobs:
             echo "=== top nodes ==="; kubectl top nodes || true
             echo "=== top pods by memory ==="; kubectl top pods -A --sort-by=memory | head -20 || true
             echo "=== host memory ==="; free -h
+            echo "=== inotify / nofile ==="
+            sysctl fs.inotify.max_user_instances fs.inotify.max_user_watches fs.file-max || true
+            docker exec srectl-control-plane sh -c 'ulimit -n' || true
             echo "=== falco describe ==="
             kubectl -n security describe pod -l app.kubernetes.io/name=falco | tail -120 || true
             echo "=== falco logs ==="

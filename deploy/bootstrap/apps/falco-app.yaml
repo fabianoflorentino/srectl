@@ -15,6 +15,7 @@ spec:
           kind: modern_ebpf
         falco:
           json_output: true
+          watch_config_files: false
         falcosidekick:
           enabled: true
           config:
