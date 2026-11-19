@@ -69,6 +69,10 @@ func (c *Client) Namespace() string {
 	return c.cfg.Namespace
 }
 
+// argoHelmRepo is passed to `helm upgrade --repo` so the install does not
+// depend on the user (or CI runner) having added the `argo` Helm repo first.
+const argoHelmRepo = "https://argoproj.github.io/argo-helm"
+
 // serverDeployment is the argocd-server Deployment name produced by the
 // argo/argo-cd chart (release name "argo-cd", fullnameOverride "argocd").
 const serverDeployment = "argo-cd-argocd-server"
@@ -97,7 +101,8 @@ func (c *Client) Bootstrap(ctx context.Context) error {
 
 func (c *Client) install(ctx context.Context) error {
 	args := []string{
-		"upgrade", "--install", "argo-cd", "argo/argo-cd",
+		"upgrade", "--install", "argo-cd", "argo-cd",
+		"--repo", argoHelmRepo,
 		"--namespace", c.cfg.Namespace, "--create-namespace",
 		"--version", c.cfg.Version,
 	}

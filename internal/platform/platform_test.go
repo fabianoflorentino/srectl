@@ -71,7 +71,8 @@ func TestUp(t *testing.T) {
 	}
 	for _, want := range []string{
 		"create cluster --name srectl",
-		"upgrade --install argo-cd argo/argo-cd",
+		"upgrade --install argo-cd argo-cd",
+		"--repo https://argoproj.github.io/argo-helm",
 		"rollout status deployment/argo-cd-argocd-server",
 		"apply -f",
 	} {

@@ -60,7 +60,8 @@ func TestBootstrap(t *testing.T) {
 		t.Fatalf("Bootstrap: %v", err)
 	}
 	for _, want := range []string{
-		"upgrade --install argo-cd argo/argo-cd",
+		"upgrade --install argo-cd argo-cd",
+		"--repo https://argoproj.github.io/argo-helm",
 		"--version 10.18.0",
 		"rollout status deployment/argo-cd-argocd-server",
 		"apply -f",
