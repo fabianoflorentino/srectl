@@ -1,6 +1,18 @@
 BINARY_NAME=srectl
 GO=go
+DOCKER?=docker
 COVERAGE_MIN=80
+
+HUGO_BIN?=$(shell command -v hugo 2>/dev/null)
+HUGO_IMAGE?=ghcr.io/gohugoio/hugo:latest
+HUGO_PORT?=1313
+ifeq ($(HUGO_BIN),)
+HUGO_RUN=$(DOCKER) run --rm -u $(shell id -u):$(shell id -g) -v $(CURDIR):/src -w /src $(HUGO_IMAGE)
+HUGO_SERVE=$(DOCKER) run --rm -u $(shell id -u):$(shell id -g) -v $(CURDIR):/src -w /src -p $(HUGO_PORT):1313 $(HUGO_IMAGE)
+else
+HUGO_RUN=$(HUGO_BIN)
+HUGO_SERVE=$(HUGO_BIN)
+endif
 
 VERSION?=$(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
 COMMIT?=$(shell git rev-parse --short HEAD 2>/dev/null || echo none)
@@ -75,13 +87,13 @@ e2e:
 install:
 	$(GO) install $(LDFLAGS) ./cmd/srectl
 
-## site-dev: Serve the Hugo documentation site locally
+## site-dev: Serve the Hugo documentation site locally (Docker fallback when Hugo is absent)
 site-dev:
-	hugo server --source site --bind 0.0.0.0
+	$(HUGO_SERVE) server --source site --bind 0.0.0.0
 
-## site-build: Build the static documentation site
+## site-build: Build the static documentation site (Docker fallback when Hugo is absent)
 site-build:
-	hugo --source site --minify
+	$(HUGO_RUN) --source site --minify
 
 ## help: Show this help message
 help:
