@@ -8,7 +8,7 @@ HUGO_IMAGE?=ghcr.io/gohugoio/hugo:latest
 HUGO_PORT?=9000
 ifeq ($(HUGO_BIN),)
 HUGO_RUN=$(DOCKER) run --rm -u $(shell id -u):$(shell id -g) -v $(CURDIR):/src -w /src $(HUGO_IMAGE)
-HUGO_SERVE=$(DOCKER) run --rm -u $(shell id -u):$(shell id -g) -v $(CURDIR):/src -w /src -p $(HUGO_PORT):1313 $(HUGO_IMAGE)
+HUGO_SERVE=$(DOCKER) run --rm -u $(shell id -u):$(shell id -g) -v $(CURDIR):/src -w /src -p $(HUGO_PORT):$(HUGO_PORT) $(HUGO_IMAGE)
 else
 HUGO_RUN=$(HUGO_BIN)
 HUGO_SERVE=$(HUGO_BIN)
@@ -89,7 +89,7 @@ install:
 
 ## site-dev: Serve the Hugo documentation site locally (Docker fallback when Hugo is absent)
 site-dev:
-	$(HUGO_SERVE) server --source site --bind 0.0.0.0
+	$(HUGO_SERVE) server --source site --bind 0.0.0.0 --port $(HUGO_PORT)
 
 ## site-build: Build the static documentation site (Docker fallback when Hugo is absent)
 site-build:
