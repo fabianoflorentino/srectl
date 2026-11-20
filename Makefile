@@ -5,7 +5,7 @@ COVERAGE_MIN=80
 
 HUGO_BIN?=$(shell command -v hugo 2>/dev/null)
 HUGO_IMAGE?=ghcr.io/gohugoio/hugo:latest
-HUGO_PORT?=1313
+HUGO_PORT?=9000
 ifeq ($(HUGO_BIN),)
 HUGO_RUN=$(DOCKER) run --rm -u $(shell id -u):$(shell id -g) -v $(CURDIR):/src -w /src $(HUGO_IMAGE)
 HUGO_SERVE=$(DOCKER) run --rm -u $(shell id -u):$(shell id -g) -v $(CURDIR):/src -w /src -p $(HUGO_PORT):1313 $(HUGO_IMAGE)

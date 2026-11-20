@@ -66,14 +66,14 @@ and the corresponding `srectl demo` command.
 ## Build & deploy
 
 ```bash
-make site-dev        # local server (http://localhost:1313/srectl/) — EN + PT-BR
+make site-dev        # local server (http://localhost:9000/srectl/) — EN + PT-BR
 make site-build      # static build
 ```
 
 Hugo is optional: when `hugo` is not on `PATH`, the Make targets run
 `ghcr.io/gohugoio/hugo:latest` through Docker. Override with `HUGO_BIN=/path/to/hugo`
-or `HUGO_IMAGE=<image>` if needed. The dev server publishes port **1313**
-(`HUGO_PORT=1314 make site-dev` if it is already taken).
+or `HUGO_IMAGE=<image>` if needed. The dev server publishes port **9000**
+(`HUGO_PORT=9001 make site-dev` if it is already taken).
 
 GitHub Actions builds the site and pushes to GitHub Pages (`peaceiris/actions-gh-pages`
 or the official `actions/deploy-pages`).

@@ -67,14 +67,14 @@ Grafana e ao comando `srectl demo` correspondente.
 ## Build & deploy
 
 ```bash
-make site-dev        # servidor local (http://localhost:1313/srectl/) — EN + PT-BR
+make site-dev        # servidor local (http://localhost:9000/srectl/) — EN + PT-BR
 make site-build      # build estático
 ```
 
 O Hugo é opcional: quando `hugo` não está no `PATH`, os alvos do Make usam
 `ghcr.io/gohugoio/hugo:latest` via Docker. Sobrescreva com `HUGO_BIN=/caminho/hugo`
-ou `HUGO_IMAGE=<imagem>` se necessário. O servidor de dev publica a porta **1313**
-(`HUGO_PORT=1314 make site-dev` se ela estiver ocupada).
+ou `HUGO_IMAGE=<imagem>` se necessário. O servidor de dev publica a porta **9000**
+(`HUGO_PORT=9001 make site-dev` se ela estiver ocupada).
 
 O GitHub Actions builda o site e faz push para o GitHub Pages (`peaceiris/actions-gh-pages`
 ou o oficial `actions/deploy-pages`).
